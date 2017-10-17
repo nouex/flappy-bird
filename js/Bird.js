@@ -41,9 +41,12 @@ Bird.prototype.updateY = function () {
       x = (timeNow - upStart) / 1000
   // -70x^2 + 140x + 0 // up 70px in 2sec
   // let y = (Math.pow(x, 2) * -70) + (140 *x) + 0
-  let y = (Math.pow(x, 2) * -1570) + (540 *x) + 0
-  this.y1 = this.y1Start -y
+  let y = (Math.pow(x, 2) * -1570) + (540 *x) + 0,
+      y1 = this.y1Start -y,
+      y1Prev = this.y1
+  this.y1 = y1
   this.y2 = this.height + this.y1
+  this.updatePivot(y1Prev, y1)
 };
 
 Bird.prototype.isXBetween = function (l, r) {
@@ -136,19 +139,28 @@ Bird.prototype.up = function () {
   this.upStart = new Date()
 };
 
+Bird.prototype.updatePivot = function (prev, next) {
+  if (prev < next) this.pivotUp = false
+  else this.pivotUp = true
+};
+
 Bird.prototype.draw = function () {
   let {canvas} = this,
       ctx = canvas.getContext("2d"),
-      birdImg = this.img
+      birdImg = this.img,
+      pivotDeg = this.pivotUp ? -10 : 10
 
   this.startFlapping() // start flapping if it already hasn't
   this.updateY() // 1.
   this.updateFlapping() // 3.
   this.updateBobbing() // 2.
+  ctx.save()
+  if (!this.bobbing) ctx.rotate(pivotDeg * Math.PI/180)
   ctx.drawImage(
     birdImg, this.sX, 0, birdImg.width / 3, birdImg.height,
     this.x1, this.y1, this.width, this.height
   )
+  ctx.restore()
   // ctx.fillStyle = "green"
   // ctx.fillRect(this.x1, this.y1, birdImg.width, birdImg.height )
 };
