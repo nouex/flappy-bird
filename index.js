@@ -59,6 +59,7 @@
 const canvas = document.getElementById("ctx")
 const CANVAS_SCALE = 0.16
 const FOREGROUND_SPEED = canvas.width / 5
+const P_TUBE_SEP = 0.427 // 205px / 480px
 const { UI } = Loader;
 const ctx = canvas.getContext("2d")
 const ground = new Ground(canvas, UI.ground)
@@ -72,6 +73,7 @@ UI.onLoad(() => {
 })
 
 function render() {
+  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
   ground.draw(speed)
   tubes.draw(speed)
   window.requestAnimationFrame(render)
