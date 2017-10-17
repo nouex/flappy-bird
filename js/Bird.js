@@ -28,9 +28,14 @@ function Bird(canvas, img) {
   this.lastFlapTime = null
   this.currFlap = 1
   this.changeFlap(this.currFlap)
+  this.lastBobTime = null
+  this.bobbingUp = true
+  this.bobbing = true
+  this.prevAdjDist = 0
 }
 
 Bird.prototype.updateY = function () {
+  if (this.bobbing) return;
   let timeNow =new Date(),
       upStart = this.upStart === null ? timeNow : this.upStart,
       x = (timeNow - upStart) / 1000
@@ -87,9 +92,46 @@ Bird.prototype.changeFlap = function (n) {
   this.currFlap = n
 };
 
+Bird.prototype.updateBobbing = function () {
+  if (false == this.bobbing) return
+  let range = 15,
+      now = new Date(),
+      speed = 30, // 30 px per sec
+      lastBobTime = this.lastBobTime === null ? now : this.lastBobTime,
+      dist = (now / 1000) * speed,
+      adjDist = ~~(dist % range),
+      y1Prev = this.y1,
+      y1
+
+  if (this.prevAdjDist > adjDist) {
+      this.bobbingUp = !this.bobbingUp
+  }
+
+  if (this.bobbingUp) {
+    y1 = this.y1Start + adjDist
+  } else {
+    y1 = this.y1Start + (range -adjDist)
+  }
+
+  this.y1 = y1
+  this.y2 = this.height + this.y1
+  this.lastBobTime = now
+  this.prevAdjDist = adjDist
+};
+
+Bird.prototype.stopBobbing = function () {
+  this.bobbing = false;
+};
+
+Bird.prototype.startBobbing = function () {
+  if (this.flapping) return // bird bobs when idle i.e. game hasn't begun
+  // as a matter of fact i think we should throw
+  this.bobbing = true
+};
+
 // on spacebar
 Bird.prototype.up = function () {
-  this.startFlapping()
+  this.stopBobbing()
   this.y1Start = this.y1
   this.upStart = new Date()
 };
@@ -99,8 +141,10 @@ Bird.prototype.draw = function () {
       ctx = canvas.getContext("2d"),
       birdImg = this.img
 
+  this.startFlapping() // start flapping if it already hasn't
   this.updateY() // 1.
   this.updateFlapping() // 3.
+  this.updateBobbing() // 2.
   ctx.drawImage(
     birdImg, this.sX, 0, birdImg.width / 3, birdImg.height,
     this.x1, this.y1, this.width, this.height
