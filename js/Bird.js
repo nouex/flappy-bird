@@ -144,6 +144,10 @@ Bird.prototype.updatePivot = function (prev, next) {
   else this.pivotUp = true
 };
 
+Bird.prototype.hasFallen = function () {
+  return this.y2 >= ABOVE_GROUND_HEIGHT
+};
+
 Bird.prototype.draw = function () {
   let {canvas} = this,
       ctx = canvas.getContext("2d"),

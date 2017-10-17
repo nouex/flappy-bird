@@ -58,6 +58,7 @@
 
 const canvas = document.getElementById("ctx")
 const CANVAS_SCALE = 0.16
+const ABOVE_GROUND_HEIGHT = canvas.height - (canvas.height * CANVAS_SCALE)
 const FOREGROUND_SPEED = canvas.width / 5
 const P_TUBE_SEP = 0.427 // 205px / 480px
 const { UI } = Loader;
@@ -80,7 +81,7 @@ $("#ctx").on("click", () => {
 
 function render() {
   if (!bird) bird = new Bird(canvas, UI.bird)
-  if (tubes.hasCollisions(bird)) {
+  if (tubes.hasCollisions(bird) || bird.hasFallen()) {
     gameOver();
     return;
   }
