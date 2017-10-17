@@ -158,13 +158,15 @@ Bird.prototype.draw = function () {
   this.updateY() // 1.
   this.updateFlapping() // 3.
   this.updateBobbing() // 2.
-  ctx.save()
-  if (!this.bobbing) ctx.rotate(pivotDeg * Math.PI/180)
+  if (!this.bobbing) {
+    ctx.save()
+    ctx.rotate(pivotDeg * Math.PI/180)
+  }
   ctx.drawImage(
     birdImg, this.sX, 0, birdImg.width / 3, birdImg.height,
     this.x1, this.y1, this.width, this.height
   )
-  ctx.restore()
+  if (!this.bobbing) ctx.restore()
   // ctx.fillStyle = "green"
   // ctx.fillRect(this.x1, this.y1, birdImg.width, birdImg.height )
 };
