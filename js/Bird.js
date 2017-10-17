@@ -25,6 +25,9 @@ function Bird(canvas, img) {
   this.upStart = null;
   this.flapping = false;
   this.sX = 0
+  this.lastFlapTime = null
+  this.currFlap = 1
+  this.changeFlap(this.currFlap)
 }
 
 Bird.prototype.updateY = function () {
@@ -57,15 +60,31 @@ Bird.prototype.stopFlapping = function () {
 
 Bird.prototype.updateFlapping = function () {
   if (false === this.flapping) return;
-  // 276w /3 => 92
+  let {lastFlapTime, currFlap} = this,
+      currTime = new Date()
+  if (lastFlapTime === null) {
+    lastFlapTime = currTime
+    this.lastFlapTime = currTime
+  }
+  // transitions every interval (ms)
+  let interval = 1000 / 12,
+      timeDiff = currTime - lastFlapTime,
+      nBehind = timeDiff / interval, // n of times we are behind in flaps
+      nextFlap = (currFlap + Math.floor(nBehind)) % 3
 
+  if (nBehind >=1) {  // update time only if we had to update flap
+    this.lastFlapTime = currTime
+    this.changeFlap(nextFlap)
+  }
 };
 
 Bird.prototype.changeFlap = function (n) {
+  if (~~(n) !== n) throw new Error("'n' must be an integer")
   if (!(0 <= n && n <= 2)) throw new Error("invalid flap n ", n)
   let startAt = (n) * 92,
       endtAt = startAt + 92 +1 // +1 assuming endAt is exclusive
   this.sX = startAt
+  this.currFlap = n
 };
 
 // on spacebar
