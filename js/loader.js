@@ -10,6 +10,7 @@ const Loader = (function () {
   const UI = {
     ground: loadImg("imgs/ground.png"),
     tube: loadImg("imgs/pipe.png"),
+    bird: loadImg("imgs/bird.png"),
     onLoad: (fn) => {
       awaitingCb = fn
       if (awaiting === 0) fn();

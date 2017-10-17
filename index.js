@@ -64,6 +64,8 @@ const { UI } = Loader;
 const ctx = canvas.getContext("2d")
 const ground = new Ground(canvas, UI.ground)
 const tubes = new Tubes(canvas, UI.tube)
+// FIXME: bird.img.height/width === 0 in constructor if we instantinate it here
+let bird;
 const speed = 1; // initial
 // window.requestAnimationFrame = function (fn) {
 //   this.setTimeout(fn, 500)
@@ -72,9 +74,23 @@ UI.onLoad(() => {
   window.requestAnimationFrame(render)
 })
 
+$("#ctx").on("click", () => {
+  bird.up()
+})
+
 function render() {
+  if (!bird) bird = new Bird(canvas, UI.bird)
+  if (tubes.hasCollisions(bird)) {
+    gameOver();
+    return;
+  }
   canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
   ground.draw(speed)
   tubes.draw(speed)
+  bird.draw(speed)
   window.requestAnimationFrame(render)
+}
+
+function gameOver() {
+  document.write("<H1>GAME OVER G</H1>")
 }

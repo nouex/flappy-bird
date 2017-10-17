@@ -50,7 +50,10 @@ const Tubes = (function () {
     this.tubes.forEach((tube) => {
       tube.draw(v)
     })
-    // isGameOver ? gameOver() : void(0)
+  };
+
+  Tubes.prototype.hasCollisions = function (bird) {
+    return this.tubes.some((tube) => tube.hasCollision(bird))
   };
 
   function Tube(canvas, gapTopStart) {
@@ -108,6 +111,45 @@ const Tubes = (function () {
     else return true
   };
 
+  // TODO: make it a getter prop
+  Tube.prototype.leftEdge = function () {
+    let canvas = this.canvas,
+        lEdge = (canvas.width -1) - this.dist
+
+    return lEdge
+  };
+
+  // TODO: make it a getter prop using es6 preferably
+  Tube.prototype.rightEdge = function () {
+    return (this.canvas.width * CANVAS_SCALE) + this.leftEdge()
+  };
+
+  // aka bottom gap edge
+  Tube.prototype.bottTubeTopEdge = function () {
+    let scaledGroundHeight = this.canvas.height * CANVAS_SCALE,
+    gap = (this.canvas.height - scaledGroundHeight) * 0.40
+    return this.topTubeBottEdge() + gap
+  };
+
+  // aka top gap edge
+  Tube.prototype.topTubeBottEdge = function () {
+    return this.gapTopStart
+  };
+
+  Tube.prototype.hasCollision = function (o) {
+    let leftTubeEdge = this.leftEdge(),
+        rightTubeEdge = this.rightEdge(),
+        bottTubeTopEdge = this.bottTubeTopEdge(),
+        topTubeBottEdge = this.topTubeBottEdge()
+
+    if (o.isXBetween(leftTubeEdge, rightTubeEdge)) {
+      if (o.isYBetween(topTubeBottEdge, bottTubeTopEdge)) {
+        return false
+      }
+      return true
+    }
+    return false
+  };
 
   return Tubes
 })();
