@@ -93,5 +93,5 @@ function render() {
 }
 
 function gameOver() {
-  document.write("<H1>GAME OVER G</H1>")
+  // document.write("<H1>GAME OVER G</H1>")
 }
