@@ -10,6 +10,7 @@
 function Bird(canvas, img) {
   this.img = img
   let {width, height} = img // TODO: scaledWidth
+  width = width / 3
   let scaledWidth = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
   let birdRatio  = scaledWidth / width
   let scaledHeight = height * birdRatio
@@ -22,6 +23,8 @@ function Bird(canvas, img) {
   this.y1Start = this.y1
   this.y2 = this.height + this.y1
   this.upStart = null;
+  this.flapping = false;
+  this.sX = 0
 }
 
 Bird.prototype.updateY = function () {
@@ -45,12 +48,29 @@ Bird.prototype.isYBetween = function (t, b) {
 };
 
 Bird.prototype.startFlapping = function () {
+  this.flapping = true;
+};
 
+Bird.prototype.stopFlapping = function () {
+  this.flapping = false
+};
+
+Bird.prototype.updateFlapping = function () {
+  if (false === this.flapping) return;
+  // 276w /3 => 92
+
+};
+
+Bird.prototype.changeFlap = function (n) {
+  if (!(0 <= n && n <= 2)) throw new Error("invalid flap n ", n)
+  let startAt = (n) * 92,
+      endtAt = startAt + 92 +1 // +1 assuming endAt is exclusive
+  this.sX = startAt
 };
 
 // on spacebar
 Bird.prototype.up = function () {
-  !this.flapping ? this.startFlapping() : void(0)
+  this.startFlapping()
   this.y1Start = this.y1
   this.upStart = new Date()
 };
@@ -60,9 +80,10 @@ Bird.prototype.draw = function () {
       ctx = canvas.getContext("2d"),
       birdImg = this.img
 
-  this.updateY()
+  this.updateY() // 1.
+  this.updateFlapping() // 3.
   ctx.drawImage(
-    birdImg, 0, 0, birdImg.width, birdImg.height,
+    birdImg, this.sX, 0, birdImg.width / 3, birdImg.height,
     this.x1, this.y1, this.width, this.height
   )
   // ctx.fillStyle = "green"
