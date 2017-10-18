@@ -149,7 +149,7 @@ Bird.prototype.hasFallen = function () {
 };
 
 Bird.prototype.draw = function () {
-  let {canvas} = this,
+  let { canvas } = this,
       ctx = canvas.getContext("2d"),
       birdImg = this.img,
       pivotDeg = this.pivotUp ? -10 : 10
@@ -160,13 +160,11 @@ Bird.prototype.draw = function () {
   this.updateBobbing() // 2.
   if (!this.bobbing) {
     ctx.save()
-    ctx.rotate(pivotDeg * Math.PI/180)
+    ctx.rotate(helpers.degToRadians(pivotDeg))
   }
   ctx.drawImage(
     birdImg, this.sX, 0, birdImg.width / 3, birdImg.height,
     this.x1, this.y1, this.width, this.height
   )
   if (!this.bobbing) ctx.restore()
-  // ctx.fillStyle = "green"
-  // ctx.fillRect(this.x1, this.y1, birdImg.width, birdImg.height )
 };

@@ -94,7 +94,7 @@ const Tubes = (function () {
       img, 0, 0, width, height, dX, this.gapTopStart + gap, scaledWith,
       aboveGroundHeight - (this.gapTopStart + gap))
     ctx.save()
-    ctx.rotate(180 * Math.PI/180)
+    ctx.rotate(helpers.degToRadians(180))
     ctx.drawImage(
       img, 0, 0, width, height, -dX -scaledWith, -this.gapTopStart,
       scaledWith, this.gapTopStart )
