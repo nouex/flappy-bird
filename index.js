@@ -57,8 +57,10 @@
 
 
 const canvas = document.getElementById("ctx")
+const background = document.getElementById("background")
 const CANVAS_SCALE = 0.16
 const ABOVE_GROUND_HEIGHT = canvas.height - (canvas.height * CANVAS_SCALE)
+const GROUND_HEIGHT = canvas.height - ABOVE_GROUND_HEIGHT
 const FOREGROUND_SPEED = canvas.width / 5
 const P_TUBE_SEP = 0.427 // 205px / 480px
 const { UI } = Loader;
@@ -73,6 +75,9 @@ const speed = 1; // initial
 // }
 UI.onLoad(() => {
   window.requestAnimationFrame(render)
+  let back = UI.background
+  background.getContext("2d")
+    .drawImage(back, 0, GROUND_HEIGHT, back.width, back.height, 0, 0, background.width, background.height)
 })
 
 $("#ctx").on("click", () => {
