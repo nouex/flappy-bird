@@ -8,41 +8,44 @@
  */
 
 function Bird(canvas, img) {
-  this.img = img
-  let {width, height} = img // TODO: scaledWidth
-  width = width / 3
-  let scaledWidth = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
-  let birdRatio  = scaledWidth / width
-  let scaledHeight = height * birdRatio
+  let { width, height } = img
+      width = width / 3
+
   this.canvas = canvas
-  this.height = scaledHeight
-  this.width = scaledWidth
-  this.x1 = 50
+  this.ctx = canvas.getContext("2d")
+  this.img = img
+  this.height = height * (SCALED_BIRD_WIDTH / width)
+  this.width = SCALED_BIRD_WIDTH
+  this.x1 = 0.15 * canvas.width // 10% of canvas width
   this.x2 = this.width + this.x1
-  this.y1 = canvas.height / 2 - height / 2 // FIXME: should be aboveGroundHeight
-  this.y1Start = this.y1
+  this.y1 = SCALED_ABOVE_GROUND_HEIGHT / 2 - this.height / 2 // middle of aboveGroundHeight
+  this.y1Idle = this.y1
   this.y2 = this.height + this.y1
   this.upStart = null;
   this.flapping = false;
-  this.sX = 0
+  this.sX = 0 // "source x" used for drawImage()
   this.lastFlapTime = null
   this.currFlap = 1
-  this.changeFlap(this.currFlap)
-  this.lastBobTime = null
-  this.bobbingUp = true
-  this.bobbing = true
+  this.lastHoverTime = null
+  this.isHoverUp = true
+  this.hover = null
   this.prevAdjDist = 0
+  this.flying = true;
+
+  this.changeFlap(this.currFlap)
+  this.startHover()
+  this.startFlapping()
 }
 
-Bird.prototype.updateY = function () {
-  if (this.bobbing) return;
-  let timeNow =new Date(),
+Bird.prototype.updateFlapEffect = function () {
+  if (!this.flying) return;
+  let timeNow = new Date(),
       upStart = this.upStart === null ? timeNow : this.upStart,
       x = (timeNow - upStart) / 1000
   // -70x^2 + 140x + 0 // up 70px in 2sec
   // let y = (Math.pow(x, 2) * -70) + (140 *x) + 0
   let y = (Math.pow(x, 2) * -1570) + (540 *x) + 0,
-      y1 = this.y1Start -y,
+      y1 = this.y1Idle -y,
       y1Prev = this.y1
   this.y1 = y1
   this.y2 = this.height + this.y1
@@ -55,7 +58,6 @@ Bird.prototype.isXBetween = function (l, r) {
 
 Bird.prototype.isYBetween = function (t, b) {
   return t <= this.y1 && this.y2 <= b
-  // 258 <= 214 && 150 <= 43
 };
 
 Bird.prototype.startFlapping = function () {
@@ -95,47 +97,49 @@ Bird.prototype.changeFlap = function (n) {
   this.currFlap = n
 };
 
-Bird.prototype.updateBobbing = function () {
-  if (false == this.bobbing) return
+Bird.prototype.updateHover = function () {
+  if (false === this.hover) return
+  if (false === this.flying) return
   let range = 15,
       now = new Date(),
       speed = 30, // 30 px per sec
-      lastBobTime = this.lastBobTime === null ? now : this.lastBobTime,
+      lastHoverTime = this.lastHoverTime === null ? now : this.lastHoverTime,
       dist = (now / 1000) * speed,
       adjDist = ~~(dist % range),
       y1Prev = this.y1,
       y1
 
   if (this.prevAdjDist > adjDist) {
-      this.bobbingUp = !this.bobbingUp
+      this.isHoverUp = !this.isHoverUp
   }
 
-  if (this.bobbingUp) {
-    y1 = this.y1Start + adjDist
+  if (this.isHoverUp) {
+    y1 = this.y1Idle + adjDist
   } else {
-    y1 = this.y1Start + (range -adjDist)
+    y1 = this.y1Idle + (range -adjDist)
   }
 
   this.y1 = y1
   this.y2 = this.height + this.y1
-  this.lastBobTime = now
+  this.lastHoverTime = now
   this.prevAdjDist = adjDist
 };
 
-Bird.prototype.stopBobbing = function () {
-  this.bobbing = false;
+Bird.prototype.startHover = function () {
+  this.hover = true;
 };
 
-Bird.prototype.startBobbing = function () {
-  if (this.flapping) return // bird bobs when idle i.e. game hasn't begun
-  // as a matter of fact i think we should throw
-  this.bobbing = true
+Bird.prototype.stopHover = function () {
+  this.hover = false;
 };
 
-// on spacebar
+Bird.prototype.startHover = function () {
+  this.hover = true
+};
+
 Bird.prototype.up = function () {
-  this.stopBobbing()
-  this.y1Start = this.y1
+  this.stopHover()
+  this.y1Idle = this.y1
   this.upStart = new Date()
 };
 
@@ -148,23 +152,25 @@ Bird.prototype.hasFallen = function () {
   return this.y2 >= SCALED_ABOVE_GROUND_HEIGHT
 };
 
+Bird.prototype.stopFlying = function () {
+  this.flying = false
+};
+
 Bird.prototype.draw = function () {
-  let { canvas } = this,
-      ctx = canvas.getContext("2d"),
-      birdImg = this.img,
+  let { ctx, img } = this,
       pivotDeg = this.pivotUp ? -10 : 10
 
-  this.startFlapping() // start flapping if it already hasn't
-  this.updateY() // 1.
+  this.hover ?
+    this.updateHover() : // 2.
+    this.updateFlapEffect() // 1.
   this.updateFlapping() // 3.
-  this.updateBobbing() // 2.
-  if (!this.bobbing) {
-    ctx.save()
-    ctx.rotate(helpers.degToRadians(pivotDeg))
-  }
+  // if (!this.hover) {
+  //   ctx.save()
+  //   ctx.rotate(helpers.degToRadians(pivotDeg))
+  // }
   ctx.drawImage(
-    birdImg, this.sX, 0, birdImg.width / 3, birdImg.height,
+    img, this.sX, 0, img.width / 3, img.height,
     this.x1, this.y1, this.width, this.height
   )
-  if (!this.bobbing) ctx.restore()
+  // if (!this.hover) ctx.restore()
 };

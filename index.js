@@ -64,6 +64,7 @@ const SCALED_GROUND_HEIGHT = canvas.height * CANVAS_SCALE
 const SCALED_ABOVE_GROUND_HEIGHT = canvas.height - SCALED_GROUND_HEIGHT
 const SCALED_MIN_TUBE_HEIGHT = 0.037 * SCALED_ABOVE_GROUND_HEIGHT
 let SCALED_TUBE_WIDTH; // tmp
+const SCALED_BIRD_WIDTH = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
 const FOREGROUND_SPEED = canvas.width / 5
 const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
 const SCALED_GAP_HEIGHT = SCALED_ABOVE_GROUND_HEIGHT * 0.40
@@ -92,6 +93,8 @@ $("#ctx").on("click", () => {
 function render() {
   if (!bird) bird = new Bird(canvas, UI.bird)
   if (tubes.hasCollisions(bird) || bird.hasFallen()) {
+    bird.stopFlying()
+    bird.stopFlapping()
     gameOver();
     return;
   }
