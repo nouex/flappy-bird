@@ -66,10 +66,25 @@ const SCALED_MIN_TUBE_H = 0.037 * SCALED_ABOVE_GROUND_H
 let SCALED_TUBE_W; // tmp
 const SCALED_BIRD_W = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
 const FOREGROUND_SPEED = canvas.width / 5
+const FLAPPING_SPEED = 12 // flaps per sec
+const HOVER_SPEED = 30 // px per sec
 const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
 const SCALED_GAP_H = SCALED_ABOVE_GROUND_H * 0.40
+// TODO: rm "Linear" part of name
 const dForegroundLinear = (x, itemSpeed = 0) => {
   return helpers.dLinear(x, FOREGROUND_SPEED + itemSpeed)
+}
+const dFlyEffect = (x) => {
+  // -70x^2 + 140x + 0 // up 70px in 2sec
+  // let y = (Math.pow(x, 2) * -70) + (140 *x) + 0
+  x = ((new Date()) - x) / 1000
+  return (Math.pow(x, 2) * -1570) + (540 *x) + 0
+}
+const dFlapping = (x, itemSpeed = 0) => {
+  return helpers.dLinear(x, FLAPPING_SPEED + itemSpeed)
+}
+const dHover = (x, itemSpeed = 0) => {
+  return helpers.dLinear(x, HOVER_SPEED + itemSpeed)
 }
 const { UI } = Loader;
 const ctx = canvas.getContext("2d")
@@ -90,7 +105,7 @@ UI.onLoad(() => {
 })
 
 $("#ctx").on("click", () => {
-  bird.up()
+  bird.fly()
 })
 
 function render() {

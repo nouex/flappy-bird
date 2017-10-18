@@ -21,35 +21,32 @@ function Bird(canvas, img) {
   this.y1 = SCALED_ABOVE_GROUND_H / 2 - this.height / 2 // middle of aboveGroundHeight
   this.y1Idle = this.y1
   this.y2 = this.height + this.y1
-  this.upStart = null;
   this.flapping = false;
   this.sX = 0 // "source x" used for drawImage()
-  this.lastFlapTime = null
   this.currFlap = 1
-  this.lastHoverTime = null
   this.isHoverUp = true
   this.hover = null
-  this.prevAdjDist = 0
+  this.prevHoverRelDist = 0
   this.flying = true;
+  this.flapEntryTime = null
+  this.hoverEntryTime = null
+  this.flyEffectEntry = null
 
   this.changeFlap(this.currFlap)
   this.startHover()
   this.startFlapping()
 }
 
-Bird.prototype.updateFlapEffect = function () {
+Bird.prototype.updateFlyEffect = function () {
   if (!this.flying) return;
-  let timeNow = new Date(),
-      upStart = this.upStart === null ? timeNow : this.upStart,
-      x = (timeNow - upStart) / 1000
-  // -70x^2 + 140x + 0 // up 70px in 2sec
-  // let y = (Math.pow(x, 2) * -70) + (140 *x) + 0
-  let y = (Math.pow(x, 2) * -1570) + (540 *x) + 0,
-      y1 = this.y1Idle -y,
-      y1Prev = this.y1
-  this.y1 = y1
+  if (null === this.flyEffectEntry)
+    this.flyEffectEntry = new Date()
+  let d = dFlyEffect(this.flyEffectEntry),
+      nextY1 = this.y1Idle -d
+
+  this.updatePivot(this.y1, nextY1)
+  this.y1 = nextY1
   this.y2 = this.height + this.y1
-  this.updatePivot(y1Prev, y1)
 };
 
 Bird.prototype.isXBetween = function (l, r) {
@@ -69,23 +66,11 @@ Bird.prototype.stopFlapping = function () {
 };
 
 Bird.prototype.updateFlapping = function () {
-  if (false === this.flapping) return;
-  let {lastFlapTime, currFlap} = this,
-      currTime = new Date()
-  if (lastFlapTime === null) {
-    lastFlapTime = currTime
-    this.lastFlapTime = currTime
-  }
-  // transitions every interval (ms)
-  let interval = 1000 / 12,
-      timeDiff = currTime - lastFlapTime,
-      nBehind = timeDiff / interval, // n of times we are behind in flaps
-      nextFlap = (currFlap + Math.floor(nBehind)) % 3
-
-  if (nBehind >=1) {  // update time only if we had to update flap
-    this.lastFlapTime = currTime
-    this.changeFlap(nextFlap)
-  }
+  if (this.flapEntryTime === null)
+    this.flapEntryTime = new Date()
+  let d = dFlapping(this.flapEntryTime),
+      nextFlap = d % 3
+  this.changeFlap(~~nextFlap)
 };
 
 Bird.prototype.changeFlap = function (n) {
@@ -100,29 +85,27 @@ Bird.prototype.changeFlap = function (n) {
 Bird.prototype.updateHover = function () {
   if (false === this.hover) return
   if (false === this.flying) return
-  let range = 15,
-      now = new Date(),
-      speed = 30, // 30 px per sec
-      lastHoverTime = this.lastHoverTime === null ? now : this.lastHoverTime,
-      dist = (now / 1000) * speed,
-      adjDist = ~~(dist % range),
-      y1Prev = this.y1,
-      y1
 
-  if (this.prevAdjDist > adjDist) {
-      this.isHoverUp = !this.isHoverUp
-  }
+  let range, dist, hoverRelDist
+
+  if (this.hoverEntryTime === null)
+    this.hoverEntryTime = new Date()
+
+  range = 15
+  dist = dHover(this.hoverEntryTime)
+  hoverRelDist = ~~(dist % range)
+
+  if (this.prevHoverRelDist > hoverRelDist)
+    this.isHoverUp = !this.isHoverUp
 
   if (this.isHoverUp) {
-    y1 = this.y1Idle + adjDist
+    this.y1 = this.y1Idle + hoverRelDist
   } else {
-    y1 = this.y1Idle + (range -adjDist)
+    this.y1 = this.y1Idle + (range -hoverRelDist)
   }
 
-  this.y1 = y1
   this.y2 = this.height + this.y1
-  this.lastHoverTime = now
-  this.prevAdjDist = adjDist
+  this.prevHoverRelDist = hoverRelDist
 };
 
 Bird.prototype.startHover = function () {
@@ -137,10 +120,10 @@ Bird.prototype.startHover = function () {
   this.hover = true
 };
 
-Bird.prototype.up = function () {
+Bird.prototype.fly = function () {
   this.stopHover()
   this.y1Idle = this.y1
-  this.upStart = new Date()
+  this.flyEffectEntry = new Date()
 };
 
 Bird.prototype.updatePivot = function (prev, next) {
@@ -162,7 +145,7 @@ Bird.prototype.draw = function () {
 
   this.hover ?
     this.updateHover() : // 2.
-    this.updateFlapEffect() // 1.
+    this.updateFlyEffect() // 1.
   this.updateFlapping() // 3.
   // if (!this.hover) {
   //   ctx.save()
