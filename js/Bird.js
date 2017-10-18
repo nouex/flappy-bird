@@ -14,11 +14,11 @@ function Bird(canvas, img) {
   this.canvas = canvas
   this.ctx = canvas.getContext("2d")
   this.img = img
-  this.height = height * (SCALED_BIRD_WIDTH / width)
-  this.width = SCALED_BIRD_WIDTH
+  this.height = height * (SCALED_BIRD_W / width)
+  this.width = SCALED_BIRD_W
   this.x1 = 0.15 * canvas.width // 10% of canvas width
   this.x2 = this.width + this.x1
-  this.y1 = SCALED_ABOVE_GROUND_HEIGHT / 2 - this.height / 2 // middle of aboveGroundHeight
+  this.y1 = SCALED_ABOVE_GROUND_H / 2 - this.height / 2 // middle of aboveGroundHeight
   this.y1Idle = this.y1
   this.y2 = this.height + this.y1
   this.upStart = null;
@@ -149,7 +149,7 @@ Bird.prototype.updatePivot = function (prev, next) {
 };
 
 Bird.prototype.hasFallen = function () {
-  return this.y2 >= SCALED_ABOVE_GROUND_HEIGHT
+  return this.y2 >= SCALED_ABOVE_GROUND_H
 };
 
 Bird.prototype.stopFlying = function () {

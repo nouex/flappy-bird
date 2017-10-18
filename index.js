@@ -59,15 +59,15 @@
 const canvas = document.getElementById("ctx")
 const background = document.getElementById("background")
 const CANVAS_SCALE = 0.16
-const SCALED_CANVAS_WIDTH = canvas.width * CANVAS_SCALE
-const SCALED_GROUND_HEIGHT = canvas.height * CANVAS_SCALE
-const SCALED_ABOVE_GROUND_HEIGHT = canvas.height - SCALED_GROUND_HEIGHT
-const SCALED_MIN_TUBE_HEIGHT = 0.037 * SCALED_ABOVE_GROUND_HEIGHT
-let SCALED_TUBE_WIDTH; // tmp
-const SCALED_BIRD_WIDTH = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
+const SCALED_CANVAS_W = canvas.width * CANVAS_SCALE
+const SCALED_GROUND_H = canvas.height * CANVAS_SCALE
+const SCALED_ABOVE_GROUND_H = canvas.height - SCALED_GROUND_H
+const SCALED_MIN_TUBE_H = 0.037 * SCALED_ABOVE_GROUND_H
+let SCALED_TUBE_W; // tmp
+const SCALED_BIRD_W = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
 const FOREGROUND_SPEED = canvas.width / 5
 const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
-const SCALED_GAP_HEIGHT = SCALED_ABOVE_GROUND_HEIGHT * 0.40
+const SCALED_GAP_H = SCALED_ABOVE_GROUND_H * 0.40
 const { UI } = Loader;
 const ctx = canvas.getContext("2d")
 const ground = new Ground(canvas, UI.ground)
@@ -80,10 +80,10 @@ const speed = 1; // initial
 // }
 UI.onLoad(() => {
   window.requestAnimationFrame(render)
-  SCALED_TUBE_WIDTH = UI.tube.width
+  SCALED_TUBE_W = UI.tube.width
   let back = UI.background
   background.getContext("2d")
-    .drawImage(back, 0, SCALED_GROUND_HEIGHT  , back.width, back.height, 0, 0, background.width, background.height)
+    .drawImage(back, 0, SCALED_GROUND_H  , back.width, back.height, 0, 0, background.width, background.height)
 })
 
 $("#ctx").on("click", () => {
