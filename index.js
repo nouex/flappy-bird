@@ -60,10 +60,12 @@ const canvas = document.getElementById("ctx")
 const background = document.getElementById("background")
 const CANVAS_SCALE = 0.16
 const SCALED_CANVAS_WIDTH = canvas.width * CANVAS_SCALE
-const ABOVE_GROUND_HEIGHT = canvas.height - (canvas.height * CANVAS_SCALE)
-const GROUND_HEIGHT = canvas.height - ABOVE_GROUND_HEIGHT
+const SCALED_GROUND_HEIGHT = canvas.height * CANVAS_SCALE
+const SCALED_ABOVE_GROUND_HEIGHT = canvas.height - SCALED_GROUND_HEIGHT
+const SCALED_MIN_TUBE_HEIGHT = 0.037 * SCALED_ABOVE_GROUND_HEIGHT
 const FOREGROUND_SPEED = canvas.width / 5
 const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
+const SCALED_GAP_HEIGHT = SCALED_ABOVE_GROUND_HEIGHT * 0.40
 const { UI } = Loader;
 const ctx = canvas.getContext("2d")
 const ground = new Ground(canvas, UI.ground)
@@ -78,7 +80,7 @@ UI.onLoad(() => {
   window.requestAnimationFrame(render)
   let back = UI.background
   background.getContext("2d")
-    .drawImage(back, 0, GROUND_HEIGHT, back.width, back.height, 0, 0, background.width, background.height)
+    .drawImage(back, 0, SCALED_GROUND_HEIGHT  , back.width, back.height, 0, 0, background.width, background.height)
 })
 
 $("#ctx").on("click", () => {

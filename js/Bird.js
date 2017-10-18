@@ -145,7 +145,7 @@ Bird.prototype.updatePivot = function (prev, next) {
 };
 
 Bird.prototype.hasFallen = function () {
-  return this.y2 >= ABOVE_GROUND_HEIGHT
+  return this.y2 >= SCALED_ABOVE_GROUND_HEIGHT
 };
 
 Bird.prototype.draw = function () {
