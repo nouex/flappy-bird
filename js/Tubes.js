@@ -14,16 +14,15 @@ const Tubes = (function () {
         { canvas} = this
 
     if (rightMostTube) {
-          rightMostSep = canvas.width - rightMostTube.getX2(),
-          createAfterSep = P_TUBE_SEP * canvas.width
+        let spaceAfterRightMost = canvas.width - rightMostTube.getX2(),
+            createTubeAfterSpaceWScaled = CREATE_TUBE_AFTER_SPACE_W * canvas.width
 
-      shouldCreate = rightMostSep >= createAfterSep
+        shouldCreate = spaceAfterRightMost >= createTubeAfterSpaceWScaled
     }
-
     shouldCreate = shouldCreate || this.tubes.length === 0
 
     if (shouldCreate) {
-          scaledGroundHeight = canvas.height * CANVAS_SCALE,
+      let scaledGroundHeight = canvas.height * CANVAS_SCALE,
           aboveGroundHeight = canvas.height - scaledGroundHeight,
           gap = aboveGroundHeight * 0.40,
           minTubeH = 0.037 * aboveGroundHeight,
@@ -113,25 +112,25 @@ const Tubes = (function () {
   };
 
   // aka bottom gap edge
-  Tube.prototype.bottTubeTopEdge = function () {
+  Tube.prototype.bottTubeY1 = function () {
     let scaledGroundHeight = this.canvas.height * CANVAS_SCALE,
     gap = (this.canvas.height - scaledGroundHeight) * 0.40
-    return this.topTubeBottEdge() + gap
+    return this.topTubeY2() + gap
   };
 
   // aka top gap edge
-  Tube.prototype.topTubeBottEdge = function () {
+  Tube.prototype.topTubeY2 = function () {
     return this.gapTopStart
   };
 
   Tube.prototype.hasCollision = function (o) {
     let x1 = this.getX1(),
         x2 = this.getX2(),
-        bottTubeTopEdge = this.bottTubeTopEdge(),
-        topTubeBottEdge = this.topTubeBottEdge()
+        bottTubeY1 = this.bottTubeY1(),
+        topTubeY2 = this.topTubeY2()
 
     if (o.isXBetween(x1, x2)) {
-      if (o.isYBetween(topTubeBottEdge, bottTubeTopEdge)) {
+      if (o.isYBetween(topTubeY2, bottTubeY1)) {
         return false
       }
       return true
