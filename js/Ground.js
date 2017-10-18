@@ -7,16 +7,15 @@ const Ground = (function () {
     this.dist = 0
   }
 
-  Ground.prototype.draw = function (speed) {
-    this.canvas.style.border = "solid 1px black"
+  Ground.prototype.draw = function () {
     let img = this.img,
         { width, height } = img,
-        canvas = this.canvas,
+        { canvas } = this,
         n = Math.ceil(canvas.width / width) +1, // +1 i know fixex but idk why
         currTime = new Date(),
         prevTime = this.prevTime === null ? currTime : this.prevTime,
         deltaTime = (currTime - prevTime) / 1000, // in secs
-        dist = FOREGROUND_SPEED * deltaTime * speed, // dist to augment
+        dist = FOREGROUND_SPEED * deltaTime, // dist to augment
         currDist = this.dist + dist,
         slideLeftAmount = currDist % width,
         scaledHeight = canvas.height * CANVAS_SCALE
