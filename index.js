@@ -63,6 +63,7 @@ const SCALED_CANVAS_WIDTH = canvas.width * CANVAS_SCALE
 const SCALED_GROUND_HEIGHT = canvas.height * CANVAS_SCALE
 const SCALED_ABOVE_GROUND_HEIGHT = canvas.height - SCALED_GROUND_HEIGHT
 const SCALED_MIN_TUBE_HEIGHT = 0.037 * SCALED_ABOVE_GROUND_HEIGHT
+let SCALED_TUBE_WIDTH; // tmp
 const FOREGROUND_SPEED = canvas.width / 5
 const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
 const SCALED_GAP_HEIGHT = SCALED_ABOVE_GROUND_HEIGHT * 0.40
@@ -78,6 +79,7 @@ const speed = 1; // initial
 // }
 UI.onLoad(() => {
   window.requestAnimationFrame(render)
+  SCALED_TUBE_WIDTH = UI.tube.width
   let back = UI.background
   background.getContext("2d")
     .drawImage(back, 0, SCALED_GROUND_HEIGHT  , back.width, back.height, 0, 0, background.width, background.height)

@@ -3,9 +3,10 @@
  */
 
 const Tubes = (function () {
-  function Tubes(canvas) {
+  function Tubes(canvas, img) {
     this.tubes = []
     this.canvas = canvas
+    this.img = img
   }
 
   Tubes.prototype.draw = function () {
@@ -27,7 +28,7 @@ const Tubes = (function () {
       gapY1Range = (SCALED_ABOVE_GROUND_HEIGHT - SCALED_MIN_TUBE_HEIGHT *2)
         - SCALED_GAP_HEIGHT
       gapY1 = helpers.random(0, gapY1Range +1) + SCALED_MIN_TUBE_HEIGHT
-      this.tubes.push(new Tube(canvas, gapY1))
+      this.tubes.push(new Tube(canvas, this.img, gapY1))
     }
 
     const deadTubesAt = []
@@ -48,72 +49,63 @@ const Tubes = (function () {
     return this.tubes.some((tube) => tube.hasCollision(bird))
   };
 
-  function Tube(canvas, gapY1) {
+  function Tube(canvas, img, gapY1) {
+    this.img = img
     this.canvas = canvas
     this.ctx = canvas.getContext("2d")
     this.gapY1 = gapY1
-    this.dist = 0
+    this.x1Reverse = 0 // x1 distance from x-axis' opposite parallel axis (what's it called?)
     this.prevTime = null
-    this.dX = this.canvas.width -1 // i put the -1 here so isVisible => true
-    // and we don't mistakelny create a nother one when we just did it's just
-    // 1px offscreen
-    this.x1 = (canvas.width -1) - this.dist
   }
 
   Tube.prototype.getX1 = function () {
     // FIXME: shold'nt it be SCALED_CANVAS_WIDTH ??
-    return (canvas.width -1) - this.dist
+    return (canvas.width -1) - this.x1Reverse
   };
 
   Tube.prototype.getX2 = function () {
-    return this.getX1() + SCALED_CANVAS_WIDTH
+    return this.getX1() + SCALED_TUBE_WIDTH
   };
 
-  Tube.prototype.draw = function (v = 1 /* increased speed */) {
-    let img = UI.tube,
-         {width, height} = img,
-         canvas = this.canvas,
-         SCALED_GROUND_HEIGHT = canvas.height * CANVAS_SCALE,
-         SCALED_ABOVE_GROUND_HEIGHT = canvas.height - SCALED_GROUND_HEIGHT,
-         hTop =  SCALED_ABOVE_GROUND_HEIGHT/2 -(~~(SCALED_GAP_HEIGHT/2)),
-         hBot = SCALED_ABOVE_GROUND_HEIGHT/2 -(~~(SCALED_GAP_HEIGHT/2))
+  Tube.prototype.draw = function () {
+    let  { img, canvas }= this,
+         { width, height } = img
 
-    // calc dX
     let currTime = new Date(),
         prevTime = this.prevTime === null ? currTime : this.prevTime,
         deltaTime = (currTime - prevTime) / 1000,
-        dist = FOREGROUND_SPEED * deltaTime * v,
-        currDist = this.dist + dist,
-        dX = (canvas.width -1) - currDist // NOTE: -1 so isVisible => true ???
+        x1ReverseDelta = FOREGROUND_SPEED * deltaTime
 
+    this.x1Reverse = this.x1Reverse + x1ReverseDelta
     this.prevTime = currTime
-    this.dist = currDist
 
     // bottom tube
     this.ctx.drawImage(
-      img, 0, 0, width, height, dX, this.gapY1 + SCALED_GAP_HEIGHT, SCALED_CANVAS_WIDTH,
-      SCALED_ABOVE_GROUND_HEIGHT - (this.gapY1 + SCALED_GAP_HEIGHT))
+      img, 0, 0, width, height, this.getX1(),
+      this.gapY1 + SCALED_GAP_HEIGHT, SCALED_CANVAS_WIDTH,
+      SCALED_ABOVE_GROUND_HEIGHT - (this.gapY1 + SCALED_GAP_HEIGHT)
+    )
+    // top tube
     ctx.save()
     ctx.rotate(helpers.degToRadians(180))
     ctx.drawImage(
-      img, 0, 0, width, height, -dX -SCALED_CANVAS_WIDTH, -this.gapY1,
+      img, 0, 0, width, height, -this.getX1() -SCALED_CANVAS_WIDTH, -this.gapY1,
       SCALED_CANVAS_WIDTH, this.gapY1 )
     ctx.restore()
   };
 
   Tube.prototype.isVisible = function () {
-    let canvas = this.canvas
     if (this.getX2() < 0 || this.getX1() > this.canvas.width) return false
     else return true
   };
 
-  // aka bottom SCALED_GAP_HEIGHTedge
+  // ~bottom gap edge
   Tube.prototype.bottTubeY1 = function () {
     return this.topTubeY2() + SCALED_GAP_HEIGHT  };
 
-  // aka top SCALED_GAP_HEIGHTedge
+  // ~ top gap edge
   Tube.prototype.topTubeY2 = function () {
-    return this.gapY1
+    return this.gapY1 -1
   };
 
   Tube.prototype.hasCollision = function (o) {
