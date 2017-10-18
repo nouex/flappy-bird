@@ -1,23 +1,20 @@
-const Tubes = (function () {
-  function random(min, max) {
-    return Math.random() * (max - min) + min;
-  }
+/**
+ * TODO: for all get*() methods, make them getter props instead
+ */
 
+const Tubes = (function () {
   function Tubes(canvas) {
     this.tubes = []
     this.canvas = canvas
   }
 
-  Tubes.prototype.draw = function (v) {
-    // should we create another tube ?
+  Tubes.prototype.draw = function () {
     let rightMostTube = this.tubes[this.tubes.length -1],
-        shouldCreate = false
+        shouldCreate = false,
+        { canvas} = this
+
     if (rightMostTube) {
-      let { canvas } = this,
-          lEdge = (canvas.width -1) - rightMostTube.dist,
-          scaledWith = canvas.width * CANVAS_SCALE,
-          rEdge = lEdge + scaledWith,
-          rightMostSep = canvas.width - rEdge,
+          rightMostSep = canvas.width - rightMostTube.getX2(),
           createAfterSep = P_TUBE_SEP * canvas.width
 
       shouldCreate = rightMostSep >= createAfterSep
@@ -26,13 +23,12 @@ const Tubes = (function () {
     shouldCreate = shouldCreate || this.tubes.length === 0
 
     if (shouldCreate) {
-      let canvas = this.canvas,
           scaledGroundHeight = canvas.height * CANVAS_SCALE,
           aboveGroundHeight = canvas.height - scaledGroundHeight,
           gap = aboveGroundHeight * 0.40,
           minTubeH = 0.037 * aboveGroundHeight,
           gapTopRange = (aboveGroundHeight - minTubeH *2) - gap,
-          gapTopStart = random(0, gapTopRange +1) + minTubeH
+          gapTopStart = helpers.random(0, gapTopRange +1) + minTubeH
       this.tubes.push(new Tube(this.canvas, gapTopStart))
     }
 
@@ -48,7 +44,7 @@ const Tubes = (function () {
     })
 
     this.tubes.forEach((tube) => {
-      tube.draw(v)
+      tube.draw()
     })
   };
 
@@ -65,13 +61,22 @@ const Tubes = (function () {
     this.dX = this.canvas.width -1 // i put the -1 here so isVisible => true
     // and we don't mistakelny create a nother one when we just did it's just
     // 1px offscreen
+    this.x1 = (canvas.width -1) - this.dist
   }
+
+  Tube.prototype.getX1 = function () {
+    // FIXME: shold'nt it be SCALED_CANVAS_WIDTH ??
+    return (canvas.width -1) - this.dist
+  };
+
+  Tube.prototype.getX2 = function () {
+    return this.getX1() + SCALED_CANVAS_WIDTH
+  };
 
   Tube.prototype.draw = function (v = 1 /* increased speed */) {
     let img = UI.tube,
          {width, height} = img,
          canvas = this.canvas,
-         scaledWith = canvas.width * CANVAS_SCALE,
          scaledGroundHeight = canvas.height * CANVAS_SCALE,
          gap = (canvas.height - scaledGroundHeight) * 0.40,
          aboveGroundHeight = canvas.height - scaledGroundHeight,
@@ -91,37 +96,20 @@ const Tubes = (function () {
 
     // bottom tube
     this.ctx.drawImage(
-      img, 0, 0, width, height, dX, this.gapTopStart + gap, scaledWith,
+      img, 0, 0, width, height, dX, this.gapTopStart + gap, SCALED_CANVAS_WIDTH,
       aboveGroundHeight - (this.gapTopStart + gap))
     ctx.save()
     ctx.rotate(helpers.degToRadians(180))
     ctx.drawImage(
-      img, 0, 0, width, height, -dX -scaledWith, -this.gapTopStart,
-      scaledWith, this.gapTopStart )
+      img, 0, 0, width, height, -dX -SCALED_CANVAS_WIDTH, -this.gapTopStart,
+      SCALED_CANVAS_WIDTH, this.gapTopStart )
     ctx.restore()
   };
 
   Tube.prototype.isVisible = function () {
-    let canvas = this.canvas,
-        lEdge = (canvas.width -1) - this.dist,
-        scaledWith = canvas.width * CANVAS_SCALE,
-        rEdge = lEdge + scaledWith
-
-    if (rEdge < 0 || lEdge > this.canvas.width) return false
+    let canvas = this.canvas
+    if (this.getX2() < 0 || this.getX1() > this.canvas.width) return false
     else return true
-  };
-
-  // TODO: make it a getter prop
-  Tube.prototype.leftEdge = function () {
-    let canvas = this.canvas,
-        lEdge = (canvas.width -1) - this.dist
-
-    return lEdge
-  };
-
-  // TODO: make it a getter prop using es6 preferably
-  Tube.prototype.rightEdge = function () {
-    return (this.canvas.width * CANVAS_SCALE) + this.leftEdge()
   };
 
   // aka bottom gap edge
@@ -137,12 +125,12 @@ const Tubes = (function () {
   };
 
   Tube.prototype.hasCollision = function (o) {
-    let leftTubeEdge = this.leftEdge(),
-        rightTubeEdge = this.rightEdge(),
+    let x1 = this.getX1(),
+        x2 = this.getX2(),
         bottTubeTopEdge = this.bottTubeTopEdge(),
         topTubeBottEdge = this.topTubeBottEdge()
 
-    if (o.isXBetween(leftTubeEdge, rightTubeEdge)) {
+    if (o.isXBetween(x1, x2)) {
       if (o.isYBetween(topTubeBottEdge, bottTubeTopEdge)) {
         return false
       }

@@ -59,6 +59,7 @@
 const canvas = document.getElementById("ctx")
 const background = document.getElementById("background")
 const CANVAS_SCALE = 0.16
+const SCALED_CANVAS_WIDTH = canvas.width * CANVAS_SCALE
 const ABOVE_GROUND_HEIGHT = canvas.height - (canvas.height * CANVAS_SCALE)
 const GROUND_HEIGHT = canvas.height - ABOVE_GROUND_HEIGHT
 const FOREGROUND_SPEED = canvas.width / 5
