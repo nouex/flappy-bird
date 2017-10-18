@@ -68,6 +68,9 @@ const SCALED_BIRD_W = canvas.height * 0.0859;// 640 / 55 // canvas height / bird
 const FOREGROUND_SPEED = canvas.width / 5
 const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
 const SCALED_GAP_H = SCALED_ABOVE_GROUND_H * 0.40
+const dForegroundLinear = (x, itemSpeed = 0) => {
+  return helpers.dLinear(x, FOREGROUND_SPEED + itemSpeed)
+}
 const { UI } = Loader;
 const ctx = canvas.getContext("2d")
 const ground = new Ground(canvas, UI.ground)

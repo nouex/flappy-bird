@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * TODO: for all get*() methods, make them getter props instead
  */
@@ -55,7 +57,7 @@ const Tubes = (function () {
     this.ctx = canvas.getContext("2d")
     this.gapY1 = gapY1
     this.x1Reverse = 0 // x1 distance from x-axis' opposite parallel axis (what's it called?)
-    this.prevTime = null
+    this.entryTime = null // time at which it enters the scene
   }
 
   Tube.prototype.getX1 = function () {
@@ -68,16 +70,13 @@ const Tubes = (function () {
   };
 
   Tube.prototype.draw = function () {
-    let  { img, canvas }= this,
+    let  { img, canvas, entryTime }= this,
          { width, height } = img
 
-    let currTime = new Date(),
-        prevTime = this.prevTime === null ? currTime : this.prevTime,
-        deltaTime = (currTime - prevTime) / 1000,
-        x1ReverseDelta = FOREGROUND_SPEED * deltaTime
-
-    this.x1Reverse = this.x1Reverse + x1ReverseDelta
-    this.prevTime = currTime
+    if (entryTime === null) {
+      entryTime = this.entryTime = new Date()
+    }
+    this.x1Reverse = dForegroundLinear(entryTime)
 
     // bottom tube
     this.ctx.drawImage(
