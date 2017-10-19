@@ -17,7 +17,7 @@
       this.entryTime = new Date()
     }
 
-    d = FB.dForegroundLinear(this.entryTime),
+    d = FB.dForeground(this.entryTime),
     slideLeftAmount = d % FB.GROUND_W
 
 

@@ -59,29 +59,14 @@
 
     const canvas = document.getElementById("ctx")
     const background = document.getElementById("background")
+    const backImg = FB.imgs.background
     FB.FOREGROUND_SPEED = canvas.width / 5 // 1/5 canvas W per sec
-    FB.FLAPPING_SPEED = 12 // flaps per sec
+    FB.FLAPPING_SPEED = 8 // flaps per sec
     FB.HOVER_SPEED = 30 // px per sec
-    // TODO: rm "Linear" part of name
-    FB.dForegroundLinear = (x, itemSpeed = 0) => {
-      return helpers.dLinear(x, FB.FOREGROUND_SPEED + itemSpeed)
-    }
-    FB.dFlyEffect = (x) => {
-      // -70x^2 + 140x + 0 // up 70px in 2sec
-      // let y = (Math.pow(x, 2) * -70) + (140 *x) + 0
-      x = ((new Date()) - x) / 1000
-      return (Math.pow(x, 2) * -1570) + (540 *x) + 0
-    }
-    FB.dFlapping = (x, itemSpeed = 0) => {
-      return helpers.dLinear(x, FB.FLAPPING_SPEED + itemSpeed)
-    }
-    FB.dHover = (x, itemSpeed = 0) => {
-      return helpers.dLinear(x, FB.HOVER_SPEED + itemSpeed)
-    }
-    const ctx = canvas.getContext("2d")
     FB.SCALE_FACTOR = canvas.width / 828 // images' intrinsics fit a  828px W canvas
     FB.TUBE_W = FB.imgs.tube.width * FB.SCALE_FACTOR
     FB.TUBE_H = FB.imgs.tube.height * FB.SCALE_FACTOR
+    FB.TUBE_CREATION_DELAY = 2500
     FB.GROUND_H = FB.imgs.ground.height * FB.SCALE_FACTOR
     FB.GROUND_W = FB.imgs.ground.width * FB.SCALE_FACTOR
     FB.ABOVE_GROUND_H = canvas.height - FB.GROUND_H
@@ -90,24 +75,48 @@
     FB.BIRD_H = FB.imgs.bird.height * FB.SCALE_FACTOR
     FB.BIRD_PIVOT_DEG = 35
     FB.CREATE_TUBE_AFTER_SPACE_W = 358 * FB.SCALE_FACTOR // 358px @828px canvas W
-    FB.GAP_H = FB.ABOVE_GROUND_H * 0.30 // 30% of... sky
-    let backImg = FB.imgs.background
-    background.getContext("2d")
-      .drawImage(backImg, 0, FB.GROUND_H  , backImg.width, backImg.height, 0, 0, background.width, background.height)
+    FB.GAP_H = FB.ABOVE_GROUND_H * 0.30 // 30% high up in the... sky
+    FB.dForeground = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FOREGROUND_SPEED + itemSpeed)
+    FB.dFlyEffect = (x) => {
+      // -70x^2 + 140x + 0 // up 70px in 2sec
+      // let y = (Math.pow(x, 2) * -70) + (140 *x) + 0
+      x = ((new Date()) - x) / 1000
+      return (Math.pow(x, 2) * -1570) + (540 *x) + 0
+    }
+    FB.dFlapping = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FLAPPING_SPEED + itemSpeed)
+    FB.dHover = (x, itemSpeed = 0) => helpers.dLinear(x, FB.HOVER_SPEED + itemSpeed)
+    FB.gameOver = false
+    let ground
+    let tubes
+    let bird
+    let ctx
 
-    const ground = new FB.Ground(canvas, FB.imgs.ground)
-    const tubes = new FB.Tubes(canvas, FB.imgs.tube)
-    const bird = new FB.Bird(canvas, FB.imgs.bird)
-    $("#ctx").on("click", () => {
-      bird.fly()
+    $(document).on("keydown", (ev) => {
+      let { which } = ev
+      if (which === 32 || which === 38) {
+        if (FB.gameOver) {
+          gameOn()
+        } else {
+          if (false === tubes.isCreating)
+            setTimeout(tubes.startCreating.bind(tubes), FB.TUBE_CREATION_DELAY)
+          bird.fly()
+        }
+      }
     })
-    window.requestAnimationFrame(render)
+    // draw background once
+    background.getContext("2d")
+      .drawImage(
+        backImg, 0, FB.GROUND_H  , backImg.width, backImg.height,
+        0, 0, background.width, background.height )
+
+    gameOn()
+
     function render() {
+      if (FB.gameOver) return
       if (tubes.hasCollisions(bird) || bird.hasFallen()) {
         bird.stopFlying()
         bird.stopFlapping()
         gameOver();
-        return;
       }
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
       ground.draw()
@@ -117,7 +126,18 @@
     }
 
     function gameOver() {
-      // document.write("<H1>GAME OVER G</H1>")
+      // show score
+      FB.gameOver = true
+    }
+
+    function gameOn() {
+      // reset score
+      ground = new FB.Ground(canvas, FB.imgs.ground)
+      tubes = new FB.Tubes(canvas, FB.imgs.tube)
+      bird = new FB.Bird(canvas, FB.imgs.bird)
+      ctx = canvas.getContext("2d")
+      FB.gameOver = false
+      window.requestAnimationFrame(render)
     }
   }
 

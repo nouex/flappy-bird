@@ -12,7 +12,7 @@
     this.canvas = canvas
     this.ctx = canvas.getContext("2d")
     this.img = img
-    this.x1 = 0.15 * canvas.width
+    this.x1 = 0.35 * canvas.width
     this.x2 = FB.BIRD_W + this.x1
     this.y1 = FB.ABOVE_GROUND_H / 2 - FB.BIRD_H / 2 // middle of atmosphere
     this.y1Baseline = this.y1

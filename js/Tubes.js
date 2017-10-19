@@ -5,9 +5,15 @@
     this.tubes = []
     this.canvas = canvas
     this.img = img
+    this.isCreating = false
   }
 
+  Tubes.prototype.startCreating = function () {
+    this.isCreating = true
+  };
+
   Tubes.prototype.shouldCreate = function () {
+    if (!this.isCreating) return false
     let rightMostTube = this.tubes[this.tubes.length -1],
         shouldCreate = false
 
@@ -65,7 +71,7 @@
     if (this.entryTime === null) {
       this.entryTime = new Date()
     }
-    this.x1Reverse = FB.dForegroundLinear(this.entryTime)
+    this.x1Reverse = FB.dForeground(this.entryTime)
   };
 
   Tube.prototype.draw = function () {
