@@ -3,8 +3,7 @@
 /**
  * TODO: for all get*() methods, make them getter props instead
  */
-
-const Tubes = (function () {
+(function (ns) {
   function Tubes(canvas, img) {
     this.tubes = []
     this.canvas = canvas
@@ -18,7 +17,7 @@ const Tubes = (function () {
 
     if (rightMostTube) {
       let spaceAfterRightMost = canvas.width - rightMostTube.getX2(),
-          createTubeAfterSpaceWScaled = CREATE_TUBE_AFTER_SPACE_W // TODO: obvious
+          createTubeAfterSpaceWScaled = FB.CREATE_TUBE_AFTER_SPACE_W // TODO: obvious
 
       shouldCreate = spaceAfterRightMost >= createTubeAfterSpaceWScaled
     }
@@ -27,9 +26,9 @@ const Tubes = (function () {
     if (shouldCreate) {
       let gapY1Range, gapY1
 
-      gapY1Range = (ABOVE_GROUND_H - MIN_TUBE_H *2)
-        - GAP_H
-      gapY1 = helpers.random(0, gapY1Range +1) + MIN_TUBE_H
+      gapY1Range = (FB.ABOVE_GROUND_H - FB.MIN_TUBE_H *2)
+        - FB.GAP_H
+      gapY1 = helpers.random(0, gapY1Range +1) + FB.MIN_TUBE_H
       this.tubes.push(new Tube(canvas, this.img, gapY1))
     }
 
@@ -61,34 +60,34 @@ const Tubes = (function () {
   }
 
   Tube.prototype.getX1 = function () {
-    return (canvas.width -1) - this.x1Reverse
+    return (this.canvas.width -1) - this.x1Reverse
   };
 
   Tube.prototype.getX2 = function () {
-    return this.getX1() + TUBE_W
+    return this.getX1() + FB.TUBE_W
   };
 
   Tube.prototype.draw = function () {
-    let  { img, canvas, entryTime }= this,
+    let  { img, canvas, entryTime, ctx }= this,
          { width, height } = img
 
     if (entryTime === null) {
       entryTime = this.entryTime = new Date()
     }
-    this.x1Reverse = dForegroundLinear(entryTime)
+    this.x1Reverse = FB.dForegroundLinear(entryTime)
 
     // bottom tube
     this.ctx.drawImage(
       img, 0, 0, width, height, this.getX1(),
-      this.gapY1 + GAP_H, TUBE_W,
-      ABOVE_GROUND_H - (this.gapY1 + GAP_H)
+      this.gapY1 + FB.GAP_H, FB.TUBE_W,
+      FB.ABOVE_GROUND_H - (this.gapY1 + FB.GAP_H)
     )
     // top tube
     ctx.save()
     ctx.rotate(helpers.degToRadians(180))
     ctx.drawImage(
-      img, 0, 0, width, height, -this.getX1() -TUBE_W, -this.gapY1,
-      TUBE_W, this.gapY1 )
+      img, 0, 0, width, height, -this.getX1() -FB.TUBE_W, -this.gapY1,
+      FB.TUBE_W, this.gapY1 )
     ctx.restore()
   };
 
@@ -99,7 +98,7 @@ const Tubes = (function () {
 
   // ~bottom gap edge
   Tube.prototype.bottTubeY1 = function () {
-    return this.topTubeY2() + GAP_H  };
+    return this.topTubeY2() + FB.GAP_H  };
 
   // ~ top gap edge
   Tube.prototype.topTubeY2 = function () {
@@ -121,5 +120,5 @@ const Tubes = (function () {
     return false
   };
 
-  return Tubes
-})();
+  ns.Tubes = Tubes
+})(FB);

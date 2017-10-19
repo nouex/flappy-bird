@@ -1,4 +1,4 @@
-const Ground = (function () {
+(function (ns) {
   function Ground(canvas, img) {
     this.canvas = canvas
     this.ctx = canvas.getContext("2d")
@@ -18,17 +18,17 @@ const Ground = (function () {
       this.entryTime = new Date()
     }
 
-    d = dForegroundLinear(this.entryTime),
+    d = FB.dForegroundLinear(this.entryTime),
     slideLeftAmount = d % width,
-    scaledHeight = canvas.height * CANVAS_SCALE
+    scaledHeight = canvas.height * FB.CANVAS_SCALE
 
 
     for (let i = 0; i <nRepeats; i++) {
       this.ctx.drawImage(
           img, 0, 0, width, height, i*width - slideLeftAmount,
-          ABOVE_GROUND_H, width, scaledHeight)
+          FB.ABOVE_GROUND_H, width, scaledHeight)
     }
   };
 
-  return Ground
-})();
+  ns.Ground = Ground
+})(FB);
