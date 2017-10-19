@@ -123,6 +123,7 @@
   Bird.prototype.updatePivot = function (prev, next) {
     if (prev < next) this.pivotUp = false
     else this.pivotUp = true
+    this.pivotDeg = this.pivotUp ? -FB.BIRD_PIVOT_DEG : FB.BIRD_PIVOT_DEG
   };
 
   Bird.prototype.hasFallen = function () {
@@ -134,22 +135,27 @@
   };
 
   Bird.prototype.draw = function () {
-    let { ctx, img } = this//,
-        // pivotDeg = this.pivotUp ? -10 : 10
+    let { ctx, img } = this
 
     this.hover ?
       this.updateHover() : // 2.
       this.updateFlyEffect() // 1.
     this.updateFlapping() // 3.
-    // if (!this.hover) { // 4.
-    //   ctx.save()
-    //   ctx.rotate(helpers.degToRadians(pivotDeg))
-    // }
+    if (!this.hover) { // 4.
+      // https://stackoverflow.com/questions/1621321/how-would-one-rotate-an-image-around-itself-using-canvas
+      let cX, cY // center of rotation
+      cX = this.x1 + FB.BIRD_W / 2
+      cY = this.y1 + FB.BIRD_H / 2
+      ctx.save()
+      ctx.translate(cX, cY)
+      ctx.rotate(helpers.degToRadians(this.pivotDeg))
+      ctx.translate(-cX, -cY)
+    }
     ctx.drawImage(
       img, this.sX, 0, img.width / 3, img.height,
       this.x1, this.y1, FB.BIRD_W, FB.BIRD_H
     )
-    // if (!this.hover) ctx.restore()
+    if (!this.hover) ctx.restore()
   };
 
   FB.Bird = Bird

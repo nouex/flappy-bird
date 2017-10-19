@@ -88,6 +88,7 @@
     FB.MIN_TUBE_H = 0.037 * FB.ABOVE_GROUND_H // tube is at least 3.7% canvas' height
     FB.BIRD_W = FB.imgs.bird.width / 3 * FB.SCALE_FACTOR;
     FB.BIRD_H = FB.imgs.bird.height * FB.SCALE_FACTOR
+    FB.BIRD_PIVOT_DEG = 35
     FB.CREATE_TUBE_AFTER_SPACE_W = 358 * FB.SCALE_FACTOR // 358px @828px canvas W
     FB.GAP_H = FB.ABOVE_GROUND_H * 0.30 // 30% of... sky
     let backImg = FB.imgs.background
