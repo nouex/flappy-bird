@@ -1,4 +1,4 @@
-(function (ns) {
+(function (FB) {
   'use strict';
 
   /**
@@ -9,21 +9,14 @@
    */
 
   function Bird(canvas, img) {
-    let { width, height } = img
-        width = width / 3
-
     this.canvas = canvas
     this.ctx = canvas.getContext("2d")
     this.img = img
-    // TODO: get rid of this.iwidth ans use BIRD_w all over
-    this.height = FB.BIRD_H
-    // ABOVE WAS : height * (BIRD_W / width)
-    this.width = FB.BIRD_W
-    this.x1 = 0.15 * canvas.width // 10% of canvas width
-    this.x2 = this.width + this.x1
-    this.y1 = FB.ABOVE_GROUND_H / 2 - this.height / 2 // middle of aboveGroundHeight
-    this.y1Idle = this.y1
-    this.y2 = this.height + this.y1
+    this.x1 = 0.15 * canvas.width
+    this.x2 = FB.BIRD_W + this.x1
+    this.y1 = FB.ABOVE_GROUND_H / 2 - FB.BIRD_H / 2 // middle of atmosphere
+    this.y1Baseline = this.y1
+    this.y2 = FB.BIRD_H + this.y1
     this.flapping = false;
     this.sX = 0 // "source x" used for drawImage()
     this.currFlap = 1
@@ -33,7 +26,7 @@
     this.flying = true;
     this.flapEntryTime = null
     this.hoverEntryTime = null
-    this.flyEffectEntry = null
+    this.flyEffectEntryTime = null
 
     this.changeFlap(this.currFlap)
     this.startHover()
@@ -42,14 +35,14 @@
 
   Bird.prototype.updateFlyEffect = function () {
     if (!this.flying) return;
-    if (null === this.flyEffectEntry)
-      this.flyEffectEntry = new Date()
-    let d = FB.dFlyEffect(this.flyEffectEntry),
-        nextY1 = this.y1Idle -d
+    if (null === this.flyEffectEntryTime)
+      this.flyEffectEntryTime = new Date()
+    let d = FB.dFlyEffect(this.flyEffectEntryTime),
+        nextY1 = this.y1Baseline -d
 
     this.updatePivot(this.y1, nextY1)
     this.y1 = nextY1
-    this.y2 = this.height + this.y1
+    this.y2 = FB.BIRD_H + this.y1
   };
 
   Bird.prototype.isXBetween = function (l, r) {
@@ -69,6 +62,7 @@
   };
 
   Bird.prototype.updateFlapping = function () {
+    if (!this.flapping) return
     if (this.flapEntryTime === null)
       this.flapEntryTime = new Date()
     let d = FB.dFlapping(this.flapEntryTime),
@@ -79,8 +73,9 @@
   Bird.prototype.changeFlap = function (n) {
     if (~~(n) !== n) throw new Error("'n' must be an integer")
     if (!(0 <= n && n <= 2)) throw new Error("invalid flap n ", n)
-    let startAt = (n) * 92,
-        endtAt = startAt + 92 +1 // +1 assuming endAt is exclusive
+    let birdImgW = FB.imgs.bird.width / 3,
+        startAt = (n) * birdImgW
+
     this.sX = startAt
     this.currFlap = n
   };
@@ -102,12 +97,12 @@
       this.isHoverUp = !this.isHoverUp
 
     if (this.isHoverUp) {
-      this.y1 = this.y1Idle + hoverRelDist
+      this.y1 = this.y1Baseline + hoverRelDist
     } else {
-      this.y1 = this.y1Idle + (range -hoverRelDist)
+      this.y1 = this.y1Baseline + (range -hoverRelDist)
     }
 
-    this.y2 = this.height + this.y1
+    this.y2 = FB.BIRD_H + this.y1
     this.prevHoverRelDist = hoverRelDist
   };
 
@@ -119,14 +114,10 @@
     this.hover = false;
   };
 
-  Bird.prototype.startHover = function () {
-    this.hover = true
-  };
-
   Bird.prototype.fly = function () {
     this.stopHover()
-    this.y1Idle = this.y1
-    this.flyEffectEntry = new Date()
+    this.y1Baseline = this.y1
+    this.flyEffectEntryTime = new Date()
   };
 
   Bird.prototype.updatePivot = function (prev, next) {
@@ -143,23 +134,23 @@
   };
 
   Bird.prototype.draw = function () {
-    let { ctx, img } = this,
-        pivotDeg = this.pivotUp ? -10 : 10
+    let { ctx, img } = this//,
+        // pivotDeg = this.pivotUp ? -10 : 10
 
     this.hover ?
       this.updateHover() : // 2.
       this.updateFlyEffect() // 1.
     this.updateFlapping() // 3.
-    // if (!this.hover) {
+    // if (!this.hover) { // 4.
     //   ctx.save()
     //   ctx.rotate(helpers.degToRadians(pivotDeg))
     // }
     ctx.drawImage(
       img, this.sX, 0, img.width / 3, img.height,
-      this.x1, this.y1, this.width, this.height
+      this.x1, this.y1, FB.BIRD_W, FB.BIRD_H
     )
     // if (!this.hover) ctx.restore()
   };
 
-  ns.Bird = Bird
+  FB.Bird = Bird
 })(FB);

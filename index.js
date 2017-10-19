@@ -59,7 +59,6 @@
 
     const canvas = document.getElementById("ctx")
     const background = document.getElementById("background")
-    FB.CANVAS_SCALE = 0.16
     FB.FOREGROUND_SPEED = canvas.width / 5 // 1/5 canvas W per sec
     FB.FLAPPING_SPEED = 12 // flaps per sec
     FB.HOVER_SPEED = 30 // px per sec
@@ -79,44 +78,30 @@
     FB.dHover = (x, itemSpeed = 0) => {
       return helpers.dLinear(x, FB.HOVER_SPEED + itemSpeed)
     }
-
     const ctx = canvas.getContext("2d")
-    const ground = new FB.Ground(canvas, FB.imgs.ground)
-    const tubes = new FB.Tubes(canvas, FB.imgs.tube)
-    // FIXME: bird.img.height/width === 0 in constructor if we instantinate it here
-    let bird;
-    const speed = 1; // initial
-    // window.requestAnimationFrame = function (fn) {
-    //   this.setTimeout(fn, 500)
-    // }
     FB.SCALE_FACTOR = canvas.width / 828 // images' intrinsics fit a  828px W canvas
-    // 80:180 80 / 138 => 0.5797
-    // or
-    // 180:80 138 / 80 => 1.725
-    // 1.725 * 480 => 828
     FB.TUBE_W = FB.imgs.tube.width * FB.SCALE_FACTOR
     FB.TUBE_H = FB.imgs.tube.height * FB.SCALE_FACTOR
     FB.GROUND_H = FB.imgs.ground.height * FB.SCALE_FACTOR
+    FB.GROUND_W = FB.imgs.ground.width * FB.SCALE_FACTOR
     FB.ABOVE_GROUND_H = canvas.height - FB.GROUND_H
     FB.MIN_TUBE_H = 0.037 * FB.ABOVE_GROUND_H // tube is at least 3.7% canvas' height
     FB.BIRD_W = FB.imgs.bird.width / 3 * FB.SCALE_FACTOR;
     FB.BIRD_H = FB.imgs.bird.height * FB.SCALE_FACTOR
     FB.CREATE_TUBE_AFTER_SPACE_W = 358 * FB.SCALE_FACTOR // 358px @828px canvas W
     FB.GAP_H = FB.ABOVE_GROUND_H * 0.30 // 30% of... sky
-    /******************************/
-    let back = FB.imgs.background
+    let backImg = FB.imgs.background
     background.getContext("2d")
-      .drawImage(back, 0, FB.GROUND_H  , back.width, back.height, 0, 0, background.width, background.height)
+      .drawImage(backImg, 0, FB.GROUND_H  , backImg.width, backImg.height, 0, 0, background.width, background.height)
 
-
+    const ground = new FB.Ground(canvas, FB.imgs.ground)
+    const tubes = new FB.Tubes(canvas, FB.imgs.tube)
+    const bird = new FB.Bird(canvas, FB.imgs.bird)
     $("#ctx").on("click", () => {
       bird.fly()
     })
-
     window.requestAnimationFrame(render)
-
     function render() {
-      if (!bird) bird = new FB.Bird(canvas, FB.imgs.bird)
       if (tubes.hasCollisions(bird) || bird.hasFallen()) {
         bird.stopFlying()
         bird.stopFlapping()
@@ -124,9 +109,9 @@
         return;
       }
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
-      ground.draw(speed)
-      tubes.draw(speed)
-      bird.draw(speed)
+      ground.draw()
+      tubes.draw()
+      bird.draw()
       window.requestAnimationFrame(render)
     }
 

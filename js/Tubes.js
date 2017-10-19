@@ -1,49 +1,43 @@
-'use strict';
+(function (FB) {
+  'use strict';
 
-/**
- * TODO: for all get*() methods, make them getter props instead
- */
-(function (ns) {
   function Tubes(canvas, img) {
     this.tubes = []
     this.canvas = canvas
     this.img = img
   }
 
-  Tubes.prototype.draw = function () {
+  Tubes.prototype.shouldCreate = function () {
     let rightMostTube = this.tubes[this.tubes.length -1],
-        shouldCreate = false,
-        { canvas} = this
+        shouldCreate = false
 
     if (rightMostTube) {
-      let spaceAfterRightMost = canvas.width - rightMostTube.getX2(),
-          createTubeAfterSpaceWScaled = FB.CREATE_TUBE_AFTER_SPACE_W // TODO: obvious
-
-      shouldCreate = spaceAfterRightMost >= createTubeAfterSpaceWScaled
+      let spaceAfterRightMost = this.canvas.width - rightMostTube.getX2()
+          shouldCreate = spaceAfterRightMost >= FB.CREATE_TUBE_AFTER_SPACE_W
     }
-    shouldCreate = shouldCreate || this.tubes.length === 0
 
-    if (shouldCreate) {
+    shouldCreate = shouldCreate || this.tubes.length === 0
+    return shouldCreate
+  };
+
+  Tubes.prototype.draw = function () {
+    let { canvas, img } = this,
+        deadTubesAt = []
+
+    if (this.shouldCreate()) {
       let gapY1Range, gapY1
 
-      gapY1Range = (FB.ABOVE_GROUND_H - FB.MIN_TUBE_H *2)
-        - FB.GAP_H
+      gapY1Range = (FB.ABOVE_GROUND_H - FB.MIN_TUBE_H *2) - FB.GAP_H
       gapY1 = helpers.random(0, gapY1Range +1) + FB.MIN_TUBE_H
-      this.tubes.push(new Tube(canvas, this.img, gapY1))
+      this.tubes.push(new Tube(canvas, img, gapY1))
     }
 
-    const deadTubesAt = []
-    this.tubes.forEach((tube, at) => {
-      if (!tube.isVisible()) deadTubesAt.push(at)
-    })
+    this.tubes.forEach((tube, at) =>
+      !tube.isVisible() ?  deadTubesAt.push(at) : void(0))
 
-    deadTubesAt.forEach((at) => {
-      this.tubes.splice(at, 1)
-    })
+    deadTubesAt.forEach((at) => this.tubes.splice(at, 1))
 
-    this.tubes.forEach((tube) => {
-      tube.draw()
-    })
+    this.tubes.forEach((tube) => tube.draw())
   };
 
   Tubes.prototype.hasCollisions = function (bird) {
@@ -56,7 +50,7 @@
     this.ctx = canvas.getContext("2d")
     this.gapY1 = gapY1
     this.x1Reverse = 0 // x1 distance from x-axis' opposite parallel axis (what's it called?)
-    this.entryTime = null // time at which it enters the scene
+    this.entryTime = null
   }
 
   Tube.prototype.getX1 = function () {
@@ -67,14 +61,17 @@
     return this.getX1() + FB.TUBE_W
   };
 
-  Tube.prototype.draw = function () {
-    let  { img, canvas, entryTime, ctx }= this,
-         { width, height } = img
-
-    if (entryTime === null) {
-      entryTime = this.entryTime = new Date()
+  Tube.prototype.update = function () {
+    if (this.entryTime === null) {
+      this.entryTime = new Date()
     }
-    this.x1Reverse = FB.dForegroundLinear(entryTime)
+    this.x1Reverse = FB.dForegroundLinear(this.entryTime)
+  };
+
+  Tube.prototype.draw = function () {
+    let  { img, ctx }= this,
+         { width, height } = img
+    this.update()
 
     // bottom tube
     this.ctx.drawImage(
@@ -120,5 +117,5 @@
     return false
   };
 
-  ns.Tubes = Tubes
+  FB.Tubes = Tubes
 })(FB);
