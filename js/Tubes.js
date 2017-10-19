@@ -18,7 +18,7 @@ const Tubes = (function () {
 
     if (rightMostTube) {
       let spaceAfterRightMost = canvas.width - rightMostTube.getX2(),
-          createTubeAfterSpaceWScaled = CREATE_TUBE_AFTER_SPACE_W * canvas.width
+          createTubeAfterSpaceWScaled = CREATE_TUBE_AFTER_SPACE_W // TODO: obvious
 
       shouldCreate = spaceAfterRightMost >= createTubeAfterSpaceWScaled
     }
@@ -27,9 +27,9 @@ const Tubes = (function () {
     if (shouldCreate) {
       let gapY1Range, gapY1
 
-      gapY1Range = (SCALED_ABOVE_GROUND_H - SCALED_MIN_TUBE_H *2)
-        - SCALED_GAP_H
-      gapY1 = helpers.random(0, gapY1Range +1) + SCALED_MIN_TUBE_H
+      gapY1Range = (ABOVE_GROUND_H - MIN_TUBE_H *2)
+        - GAP_H
+      gapY1 = helpers.random(0, gapY1Range +1) + MIN_TUBE_H
       this.tubes.push(new Tube(canvas, this.img, gapY1))
     }
 
@@ -61,12 +61,11 @@ const Tubes = (function () {
   }
 
   Tube.prototype.getX1 = function () {
-    // FIXME: shold'nt it be SCALED_CANVAS_W ??
     return (canvas.width -1) - this.x1Reverse
   };
 
   Tube.prototype.getX2 = function () {
-    return this.getX1() + SCALED_TUBE_W
+    return this.getX1() + TUBE_W
   };
 
   Tube.prototype.draw = function () {
@@ -81,15 +80,15 @@ const Tubes = (function () {
     // bottom tube
     this.ctx.drawImage(
       img, 0, 0, width, height, this.getX1(),
-      this.gapY1 + SCALED_GAP_H, SCALED_CANVAS_W,
-      SCALED_ABOVE_GROUND_H - (this.gapY1 + SCALED_GAP_H)
+      this.gapY1 + GAP_H, TUBE_W,
+      ABOVE_GROUND_H - (this.gapY1 + GAP_H)
     )
     // top tube
     ctx.save()
     ctx.rotate(helpers.degToRadians(180))
     ctx.drawImage(
-      img, 0, 0, width, height, -this.getX1() -SCALED_CANVAS_W, -this.gapY1,
-      SCALED_CANVAS_W, this.gapY1 )
+      img, 0, 0, width, height, -this.getX1() -TUBE_W, -this.gapY1,
+      TUBE_W, this.gapY1 )
     ctx.restore()
   };
 
@@ -100,7 +99,7 @@ const Tubes = (function () {
 
   // ~bottom gap edge
   Tube.prototype.bottTubeY1 = function () {
-    return this.topTubeY2() + SCALED_GAP_H  };
+    return this.topTubeY2() + GAP_H  };
 
   // ~ top gap edge
   Tube.prototype.topTubeY2 = function () {

@@ -26,7 +26,7 @@ const Ground = (function () {
     for (let i = 0; i <nRepeats; i++) {
       this.ctx.drawImage(
           img, 0, 0, width, height, i*width - slideLeftAmount,
-          canvas.height - scaledHeight, width, scaledHeight)
+          ABOVE_GROUND_H, width, scaledHeight)
     }
   };
 

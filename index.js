@@ -55,21 +55,12 @@
   *
   */
 
-
 const canvas = document.getElementById("ctx")
 const background = document.getElementById("background")
 const CANVAS_SCALE = 0.16
-const SCALED_CANVAS_W = canvas.width * CANVAS_SCALE
-const SCALED_GROUND_H = canvas.height * CANVAS_SCALE
-const SCALED_ABOVE_GROUND_H = canvas.height - SCALED_GROUND_H
-const SCALED_MIN_TUBE_H = 0.037 * SCALED_ABOVE_GROUND_H
-let SCALED_TUBE_W; // tmp
-const SCALED_BIRD_W = canvas.height * 0.0859;// 640 / 55 // canvas height / bird width => 8.5% of canvas height
-const FOREGROUND_SPEED = canvas.width / 5
+const FOREGROUND_SPEED = canvas.width / 5 // 1/5 canvas W per sec
 const FLAPPING_SPEED = 12 // flaps per sec
 const HOVER_SPEED = 30 // px per sec
-const CREATE_TUBE_AFTER_SPACE_W = 0.427 // 205px / 480px
-const SCALED_GAP_H = SCALED_ABOVE_GROUND_H * 0.40
 // TODO: rm "Linear" part of name
 const dForegroundLinear = (x, itemSpeed = 0) => {
   return helpers.dLinear(x, FOREGROUND_SPEED + itemSpeed)
@@ -96,12 +87,27 @@ const speed = 1; // initial
 // window.requestAnimationFrame = function (fn) {
 //   this.setTimeout(fn, 500)
 // }
+let SCALE_FACTOR, TUBE_W, TUBE_H, MIN_TUBE_H, GROUND_H, BIRD_W, BIRD_H, CREATE_TUBE_AFTER_SPACE_W, GAP_H
 UI.onLoad(() => {
+  SCALE_FACTOR = canvas.width / 828 // images' intrinsics fit a  828px W canvas
+  // 80:180 80 / 138 => 0.5797
+  // or
+  // 180:80 138 / 80 => 1.725
+  // 1.725 * 480 => 828
+  TUBE_W = UI.tube.width * SCALE_FACTOR
+  TUBE_H = UI.tube.height * SCALE_FACTOR
+  GROUND_H = UI.ground.height * SCALE_FACTOR
+  ABOVE_GROUND_H = canvas.height - GROUND_H
+  MIN_TUBE_H = 0.037 * ABOVE_GROUND_H // tube is at least 3.7% canvas' height
+  BIRD_W = UI.bird.width / 3 * SCALE_FACTOR;
+  BIRD_H = UI.bird.height * SCALE_FACTOR
+  CREATE_TUBE_AFTER_SPACE_W = 358 * SCALE_FACTOR // 358px @828px canvas W
+  GAP_H = ABOVE_GROUND_H * 0.30 // 30% of... sky
+  /******************************/
   window.requestAnimationFrame(render)
-  SCALED_TUBE_W = UI.tube.width
   let back = UI.background
   background.getContext("2d")
-    .drawImage(back, 0, SCALED_GROUND_H  , back.width, back.height, 0, 0, background.width, background.height)
+    .drawImage(back, 0, GROUND_H  , back.width, back.height, 0, 0, background.width, background.height)
 })
 
 $("#ctx").on("click", () => {
