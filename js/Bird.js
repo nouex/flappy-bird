@@ -38,7 +38,12 @@
     if (null === this.flyEffectEntryTime)
       this.flyEffectEntryTime = new Date()
     let d = FB.dFlyEffect(this.flyEffectEntryTime),
-        nextY1 = this.y1Baseline -d
+        nextY1 = this.y1Baseline -d,
+        nextY2 = nextY1 + FB.BIRD_H
+
+    if (nextY2 >= FB.ABOVE_GROUND_H) {
+      this.stopFlying()
+    }
 
     this.updatePivot(this.y1, nextY1)
     this.y1 = nextY1

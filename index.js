@@ -112,10 +112,7 @@
     gameOn()
 
     function render() {
-      if (FB.gameOver) return
       if (tubes.hasCollisions(bird) || bird.hasFallen()) {
-        bird.stopFlying()
-        bird.stopFlapping()
         gameOver();
       }
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
@@ -126,6 +123,9 @@
     }
 
     function gameOver() {
+      ground.stop()
+      tubes.stop()
+      bird.stopFlapping()
       // show score
       FB.gameOver = true
     }

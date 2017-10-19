@@ -50,6 +50,10 @@
     return this.tubes.some((tube) => tube.hasCollision(bird))
   };
 
+  Tubes.prototype.stop = function () {
+    this.tubes.forEach((tube) => tube.stop())
+  };
+
   function Tube(canvas, img, gapY1) {
     this.img = img
     this.canvas = canvas
@@ -57,6 +61,7 @@
     this.gapY1 = gapY1
     this.x1Reverse = 0 // x1 distance from x-axis' opposite parallel axis (what's it called?)
     this.entryTime = null
+    this.stopped = false
   }
 
   Tube.prototype.getX1 = function () {
@@ -68,6 +73,7 @@
   };
 
   Tube.prototype.update = function () {
+    if (this.stopped) return
     if (this.entryTime === null) {
       this.entryTime = new Date()
     }
@@ -121,6 +127,10 @@
       return true
     }
     return false
+  };
+
+  Tube.prototype.stop = function () {
+    this.stopped = true
   };
 
   FB.Tubes = Tubes
