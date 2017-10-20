@@ -18,7 +18,7 @@
         shouldCreate = false
 
     if (rightMostTube) {
-      let spaceAfterRightMost = this.canvas.width - rightMostTube.getX2()
+      let spaceAfterRightMost = this.canvas.width - rightMostTube.x2
           shouldCreate = spaceAfterRightMost >= FB.CREATE_TUBE_AFTER_SPACE_W
     }
 
@@ -64,13 +64,23 @@
     this.stopped = false
   }
 
-  Tube.prototype.getX1 = function () {
-    return (this.canvas.width -1) - this.x1Reverse
-  };
+  Object.defineProperty(Tube.prototype, "x1", {
+    enumerable: true,
+    configurable: true,
+    get: function (){
+      return (this.canvas.width -1) - this.x1Reverse
+    },
+    set: (v) => {throw new Error("cannot set getter-only sTube.prototype.x1")}
+  })
 
-  Tube.prototype.getX2 = function () {
-    return this.getX1() + FB.TUBE_W
-  };
+  Object.defineProperty(Tube.prototype, "x2", {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      return this.x1 + FB.TUBE_W
+    },
+    set: function () { throw new Error("cannot set getter-only Tube.prorotype.x2")}
+  })
 
   Tube.prototype.update = function () {
     if (this.stopped) return
@@ -87,7 +97,7 @@
 
     // bottom tube
     this.ctx.drawImage(
-      img, 0, 0, width, height, this.getX1(),
+      img, 0, 0, width, height, this.x1,
       this.gapY1 + FB.GAP_H, FB.TUBE_W,
       FB.ABOVE_GROUND_H - (this.gapY1 + FB.GAP_H)
     )
@@ -95,13 +105,13 @@
     ctx.save()
     ctx.rotate(helpers.degToRadians(180))
     ctx.drawImage(
-      img, 0, 0, width, height, -this.getX1() -FB.TUBE_W, -this.gapY1,
+      img, 0, 0, width, height, -this.x1 -FB.TUBE_W, -this.gapY1,
       FB.TUBE_W, this.gapY1 )
     ctx.restore()
   };
 
   Tube.prototype.isVisible = function () {
-    if (this.getX2() < 0 || this.getX1() > this.canvas.width) return false
+    if (this.x2 < 0 || this.x1 > this.canvas.width) return false
     else return true
   };
 
@@ -115,8 +125,8 @@
   };
 
   Tube.prototype.hasCollision = function (o) {
-    let x1 = this.getX1(),
-        x2 = this.getX2(),
+    let x1 = this.x1,
+        x2 = this.x2,
         bottTubeY1 = this.bottTubeY1(),
         topTubeY2 = this.topTubeY2()
 
