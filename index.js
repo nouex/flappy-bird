@@ -91,6 +91,13 @@
     FB.BTN_SM_Y1 = FB.SCORE_Y1 + FB.SCORE_H + FB.SPACE_BELOW_SCORE
     FB.BTN_SM_X1 = canvas.width - FB.ALL_SCORE_W - ((canvas.width - FB.ALL_SCORE_W) / 2),
     FB.SCORE_X1 = FB.BTN_SM_X1 + ((FB.ALL_SCORE_W - FB.SCORE_W) / 2)
+    FB.SCORE_TXT_FONT_SIZE = (35 / canvas.width) * canvas.width
+    FB.SCORE_TXT_FONT_FAMILY = "'Indie Flower', cursive"
+    FB.SCORE_TXT_FONT = `${FB.SCORE_TXT_FONT_SIZE}px ${FB.SCORE_TXT_FONT_FAMILY}`
+    FB.SCORE_TXT_Y1 = FB.SCORE_Y1 + FB.SCORE_H / 2 - (0.015 * canvas.width) // middle of score img minus %1.5 heigiht // NOTE: unlike drawImage(), the y pos is based off bottom of text
+    FB.SCORE_TXT_X1 = FB.SCORE_X1 + (FB.SCORE_W / 2) // FIXME: for it to be 100% centered we have to minus half the text width
+    FB.BEST_SCORE_TXT_X1 = FB.SCORE_TEXT_X1 // FIXME: same as above
+    FB.BEST_SCORE_TXT_Y1 = FB.SCORE_Y1 + (0.827 * FB.SCORE_H)// FIXME: y1 should also consider font height
     FB.dForeground = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FOREGROUND_SPEED + itemSpeed)
     FB.dFlyEffect = (x) => {
       // -70x^2 + 140x + 0 // up 70px in 2sec
@@ -101,10 +108,9 @@
     FB.dFlapping = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FLAPPING_SPEED + itemSpeed)
     FB.dHover = (x, itemSpeed = 0) => helpers.dLinear(x, FB.HOVER_SPEED + itemSpeed)
     FB.gameOver = false
-    let ground
-    let tubes
-    let bird
-    let ctx
+    let ground, tubes, bird, ctx, score, bestScore, scoreStartTime
+    score = bestScore = 0
+
 
     $(document).on("keydown", (ev) => {
       let { which } = ev
@@ -113,7 +119,10 @@
           gameOn()
         } else {
           if (false === tubes.isCreating)
-            setTimeout(tubes.startCreating.bind(tubes), FB.TUBE_CREATION_DELAY)
+            setTimeout(() => {
+              scoreStartTime = new Date()
+              tubes.startCreating()
+            }, FB.TUBE_CREATION_DELAY)
           bird.fly()
         }
       }
@@ -138,6 +147,8 @@
       bird.draw()
       if (isGameOver) {
         renderScore()
+        scoreStartTime = null
+
       }
       window.requestAnimationFrame(render)
     }
@@ -148,6 +159,16 @@
             restartImg = FB.imgs.restart,
             shareImg = FB.imgs.share,
             atlImg = FB.imgs.addToLeaderboard
+
+      // update score
+      // FIXME: 1. the score system is wrong 2. you should ask the tube if it
+      //  has passed a certain x point (bird.x1) for score++
+      if (scoreStartTime) {
+        let distFromCanvasX2ToBirdX1 = canvas.width - bird.x1,
+            tubePassInterval = distFromCanvasX2ToBirdX1 / FB.FOREGROUND_SPEED// interval at which a tube passes the bird in secs
+        score = Math.ceil(((new Date() - scoreStartTime) / 1000) / tubePassInterval)
+        bestScore = Math.max(score, bestScore)
+      }
       // score
       ctx.drawImage(
         scoreImg, 0, 0, scoreImg.width, scoreImg.height,
@@ -166,18 +187,24 @@
         atlImg, 0, 0, atlImg.width, atlImg.height,
         FB.BTN_SM_X1, FB.BTN_SM_Y1 + FB.BTN_H + FB.SPACE_BETW_BTNS, FB.BTN_SM_W *2 + FB.SPACE_BETW_BTNS,FB.BTN_H
       )
+      ctx.fillStyle = "black"
+      ctx.font = FB.SCORE_TXT_FONT;
+      // score text
+      ctx.fillText(score, FB.SCORE_TXT_X1, FB.SCORE_TXT_Y1);
+      // best score text
+      ctx.fillText(bestScore, FB.SCORE_TXT_X1, FB.BEST_SCORE_TXT_Y1);
     }
 
     function gameOver() {
+
       ground.stop()
       tubes.stop()
       bird.stopFlapping()
-      // show score
       FB.gameOver = true
     }
 
     function gameOn() {
-      // reset score
+      score = 0
       ground = new FB.Ground(canvas, FB.imgs.ground)
       tubes = new FB.Tubes(canvas, FB.imgs.tube)
       bird = new FB.Bird(canvas, FB.imgs.bird)
