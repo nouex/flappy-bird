@@ -79,6 +79,18 @@
     FB.BIRD_PIVOT_DEG = 35
     FB.CREATE_TUBE_AFTER_SPACE_W = 358 * FB.SCALE_FACTOR // 358px @828px canvas W
     FB.GAP_H = FB.ABOVE_GROUND_H * 0.30 // 30% high up in the... sky
+    FB.ALL_SCORE_H = (280 / 640) * canvas.height
+    FB.ALL_SCORE_W = (285 / 480) * canvas.width
+    FB.SPACE_BELOW_SCORE = (30 / 640) * canvas.height
+    FB.SPACE_BETW_BTNS = (18 / canvas.height) * canvas.height
+    FB.SCORE_H = (142 / 640) * canvas.height
+    FB.SCORE_W = (110 / 480) * canvas.width
+    FB.BTN_H = (FB.ALL_SCORE_H - FB.SCORE_H - FB.SPACE_BELOW_SCORE - FB.SPACE_BETW_BTNS) /2
+    FB.BTN_SM_W = (FB.ALL_SCORE_W - FB.SPACE_BETW_BTNS) /2
+    FB.SCORE_Y1 = canvas.height - (canvas.height / 2) - (FB.ALL_SCORE_H / 2),
+    FB.BTN_SM_Y1 = FB.SCORE_Y1 + FB.SCORE_H + FB.SPACE_BELOW_SCORE
+    FB.BTN_SM_X1 = canvas.width - FB.ALL_SCORE_W - ((canvas.width - FB.ALL_SCORE_W) / 2),
+    FB.SCORE_X1 = FB.BTN_SM_X1 + ((FB.ALL_SCORE_W - FB.SCORE_W) / 2)
     FB.dForeground = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FOREGROUND_SPEED + itemSpeed)
     FB.dFlyEffect = (x) => {
       // -70x^2 + 140x + 0 // up 70px in 2sec
@@ -115,14 +127,45 @@
     gameOn()
 
     function render() {
+      let isGameOver = false
       if (tubes.hasCollisions(bird) || bird.hasFallen()) {
         gameOver();
+        isGameOver = true
       }
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
       ground.draw()
       tubes.draw()
       bird.draw()
+      if (isGameOver) {
+        renderScore()
+      }
       window.requestAnimationFrame(render)
+    }
+
+    function renderScore() {
+      const ctx = canvas.getContext("2d"),
+            scoreImg = FB.imgs.score,
+            restartImg = FB.imgs.restart,
+            shareImg = FB.imgs.share,
+            atlImg = FB.imgs.addToLeaderboard
+      // score
+      ctx.drawImage(
+        scoreImg, 0, 0, scoreImg.width, scoreImg.height,
+        FB.SCORE_X1, FB.SCORE_Y1, FB.SCORE_W, FB.SCORE_H)
+      // restart
+      ctx.drawImage(
+        restartImg, 0, 0, restartImg.width, restartImg.height,
+        FB.BTN_SM_X1, FB.BTN_SM_Y1, FB.BTN_SM_W, FB.BTN_H)
+      // share
+      ctx.drawImage(
+        shareImg, 0, 0, shareImg.width, shareImg.height,
+        FB.BTN_SM_X1 + FB.BTN_SM_W + FB.SPACE_BETW_BTNS, FB.BTN_SM_Y1, FB.BTN_SM_W, FB.BTN_H
+      )
+      // add to leaderboard
+      ctx.drawImage(
+        atlImg, 0, 0, atlImg.width, atlImg.height,
+        FB.BTN_SM_X1, FB.BTN_SM_Y1 + FB.BTN_H + FB.SPACE_BETW_BTNS, FB.BTN_SM_W *2 + FB.SPACE_BETW_BTNS,FB.BTN_H
+      )
     }
 
     function gameOver() {

@@ -3,7 +3,11 @@
     ground: "imgs/ground.png",
     tube: "imgs/pipe.png",
     bird: "imgs/bird.png",
-    background: "imgs/background.png"
+    background: "imgs/background.png",
+    share: "imgs/share.png",
+    score: "imgs/score.png",
+    restart: "imgs/restart.png",
+    addToLeaderboard: "imgs/add-to-leaderboard.png"
   }
 
   const imgsFinal = {}
