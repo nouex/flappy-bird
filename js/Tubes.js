@@ -33,7 +33,7 @@
     if (this.shouldCreate()) {
       let gapY1Range, gapY1
 
-      gapY1Range = (FB.ABOVE_GROUND_H - FB.MIN_TUBE_H *2) - FB.GAP_H
+      gapY1Range = (FB.ABOVE_GROUND_H - FB.MIN_TUBE_H *2) - FB.GAP_H // NOTE: if there is not enough room for gap (the canvas being too small) it will go negative here and unexpected things will occur
       gapY1 = helpers.random(0, gapY1Range +1) + FB.MIN_TUBE_H
       this.tubes.push(new Tube(canvas, img, gapY1))
     }
@@ -105,18 +105,29 @@
     let  { img, ctx }= this,
          { width, height } = img
     this.update()
+    // bottom tube mouth
+    this.ctx.drawImage(
+      img, 0, 0, width, FB.TUBE_MOUTH_SRC_H, this.x1,
+      this.gapY2, FB.TUBE_W,
+      FB.TUBE_MOUTH_H
+    )
     // bottom tube
     this.ctx.drawImage(
-      img, 0, 0, width, height, this.x1,
-      this.gapY2, FB.TUBE_W,
-      FB.ABOVE_GROUND_H - this.gapY2
+      img, 0, FB.TUBE_MOUTH_SRC_H +1, width, height - FB.TUBE_MOUTH_SRC_H, this.x1,
+      this.gapY2 + FB.TUBE_MOUTH_H, FB.TUBE_W,
+      FB.ABOVE_GROUND_H - this.gapY2 - FB.TUBE_MOUTH_H
     )
-    // top tube
     ctx.save()
     ctx.rotate(helpers.degToRadians(180))
+    // top tube mouth
+    this.ctx.drawImage(
+      img, 0, 0, width, FB.TUBE_MOUTH_SRC_H,
+      -this.x1 -FB.TUBE_W, -this.gapY1, FB.TUBE_W, FB.TUBE_MOUTH_H
+    )
+    // top tube
     ctx.drawImage(
-      img, 0, 0, width, height, -this.x1 -FB.TUBE_W, -this.gapY1,
-      FB.TUBE_W, this.gapY1 )
+      img, 0, FB.TUBE_MOUTH_SRC_H +1, width, height - FB.TUBE_MOUTH_SRC_H,
+      -this.x1 -FB.TUBE_W, -this.gapY1 - -FB.TUBE_MOUTH_H, FB.TUBE_W, this.gapY1 )
     ctx.restore()
   };
 

@@ -67,10 +67,13 @@
     FB.TUBE_W = FB.imgs.tube.width * FB.SCALE_FACTOR
     FB.TUBE_H = FB.imgs.tube.height * FB.SCALE_FACTOR
     FB.TUBE_CREATION_DELAY = 2500
+    FB.TUBE_CREATION_DELAY = 2500 // ms
+    FB.TUBE_MOUTH_SRC_H = 0.14 * FB.TUBE_H // height to of mouth to crop from img
+    FB.TUBE_MOUTH_H = 0.5 * FB.TUBE_MOUTH_SRC_H // height to scale all mouths to
     FB.GROUND_H = FB.imgs.ground.height * FB.SCALE_FACTOR
     FB.GROUND_W = FB.imgs.ground.width * FB.SCALE_FACTOR
     FB.ABOVE_GROUND_H = canvas.height - FB.GROUND_H
-    FB.MIN_TUBE_H = 0.037 * FB.ABOVE_GROUND_H // tube is at least 3.7% canvas' height
+    FB.MIN_TUBE_H = 0.037 * (FB.ABOVE_GROUND_H) + FB.TUBE_MOUTH_H // tube is at least 3.7% canvas' height plus a mandatory tube mouth
     FB.BIRD_W = FB.imgs.bird.width / 3 * FB.SCALE_FACTOR;
     FB.BIRD_H = FB.imgs.bird.height * FB.SCALE_FACTOR
     FB.BIRD_PIVOT_DEG = 35
