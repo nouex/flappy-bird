@@ -64,6 +64,17 @@
     this.stopped = false
   }
 
+  Object.defineProperty(Tube.prototype, "gapY2", {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      return this.gapY1 + FB.GAP_H
+    },
+    set: function () {
+      throw new Error("cannot set")
+    }
+  })
+
   Object.defineProperty(Tube.prototype, "x1", {
     enumerable: true,
     configurable: true,
@@ -94,12 +105,11 @@
     let  { img, ctx }= this,
          { width, height } = img
     this.update()
-
     // bottom tube
     this.ctx.drawImage(
       img, 0, 0, width, height, this.x1,
-      this.gapY1 + FB.GAP_H, FB.TUBE_W,
-      FB.ABOVE_GROUND_H - (this.gapY1 + FB.GAP_H)
+      this.gapY2, FB.TUBE_W,
+      FB.ABOVE_GROUND_H - this.gapY2
     )
     // top tube
     ctx.save()
