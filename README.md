@@ -16,3 +16,4 @@ FIXMEs
 * centering of score text
 * the scoring
 * flyEffect quadratic fn
+* flickering on up() only after the first fall
