@@ -137,6 +137,8 @@
 
     function render() {
       let isGameOver = false
+      // NOTE: hasCollisions() must come before hasFallen() b/c
+      //  it updates checks done by hasFallen()
       if (tubes.hasCollisions(bird) || bird.hasFallen()) {
         gameOver();
         isGameOver = true

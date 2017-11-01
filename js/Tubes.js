@@ -154,6 +154,11 @@
     if (o.isXBetween(x1, x2)) {
       if (o.isYBetween(topTubeY2, bottTubeY1)) {
         return false
+      } else if (o.isYBetween(bottTubeY1, FB.ABOVE_GROUND_H)) {
+        if (o.x2 - x1 < FB.BIRD_W / 2) ;
+        else {
+          o.fellOnObjectAt(bottTubeY1)
+        }
       }
       return true
     }

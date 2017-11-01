@@ -28,6 +28,7 @@
     this.hoverEntryTime = null
     this.flyEffectEntryTime = null
     this.lastDownwardPivotTime = null
+    this.groundObjectH = FB.ABOVE_GROUND_H // H of obj directly below the bird
 
     this.changeFlap(this.currFlap)
     this.startHover()
@@ -42,7 +43,7 @@
         nextY1 = this.y1Baseline -d,
         nextY2 = nextY1 + FB.BIRD_H
 
-    if (nextY2 >= FB.ABOVE_GROUND_H) {
+    if (nextY2 >= FB.ABOVE_GROUND_H || nextY2 >= this.groundObjectH) {
       this.stopFlying()
     }
 
@@ -140,13 +141,17 @@
       let { lastDownwardPivotTime, pivotDeg } = this,
           deltaDeg = FB.dForeground(lastDownwardPivotTime),
           deg = Math.min(FB.BIRD_PIVOT_DEG, pivotDeg + deltaDeg)
-          
+
       this.pivotDeg = ~~deg
     }
   };
 
   Bird.prototype.hasFallen = function () {
-    return this.y2 >= FB.ABOVE_GROUND_H
+    return this.y2 >= FB.ABOVE_GROUND_H || this.y2 >= this.groundObjectH
+  };
+
+  Bird.prototype.fellOnObjectAt = function (objY1) {
+    this.groundObjectH = objY1
   };
 
   Bird.prototype.stopFlying = function () {

@@ -16,4 +16,3 @@ FIXMEs
 * centering of score text
 * the scoring
 * flyEffect quadratic fn
-* bird should not fall through tubes
