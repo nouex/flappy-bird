@@ -27,6 +27,7 @@
     this.flapEntryTime = null
     this.hoverEntryTime = null
     this.flyEffectEntryTime = null
+    this.lastDownwardPivotTime = null
 
     this.changeFlap(this.currFlap)
     this.startHover()
@@ -128,7 +129,20 @@
   Bird.prototype.updatePivot = function (prev, next) {
     if (prev < next) this.pivotUp = false
     else this.pivotUp = true
-    this.pivotDeg = this.pivotUp ? -FB.BIRD_PIVOT_DEG : FB.BIRD_PIVOT_DEG
+    if (this.pivotUp) {
+      this.lastDownwardPivotTime = null
+      this.pivotDeg = -FB.BIRD_PIVOT_DEG
+    } else {
+      if (this.lastDownwardPivotTime === null) {
+        this.pivotDeg = 0
+        this.lastDownwardPivotTime = new Date()
+      }
+      let { lastDownwardPivotTime, pivotDeg } = this,
+          deltaDeg = FB.dForeground(lastDownwardPivotTime),
+          deg = Math.min(FB.BIRD_PIVOT_DEG, pivotDeg + deltaDeg)
+          
+      this.pivotDeg = ~~deg
+    }
   };
 
   Bird.prototype.hasFallen = function () {

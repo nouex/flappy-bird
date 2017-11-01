@@ -15,5 +15,5 @@ FIXMEs
 ------
 * centering of score text
 * the scoring
-* bird flickering on up(), only on the way down use a quadratic-time fn to rotate
 * flyEffect quadratic fn
+* bird should not fall through tubes
