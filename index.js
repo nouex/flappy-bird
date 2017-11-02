@@ -68,6 +68,7 @@
     FB.TUBE_H = FB.imgs.tube.height * FB.SCALE_FACTOR
     FB.TUBE_CREATION_DELAY = 2500
     FB.TUBE_CREATION_DELAY = 2500 // ms
+    FB.ACTIVATE_KEYS_DELAY = 2000
     FB.TUBE_MOUTH_SRC_H = 0.14 * FB.TUBE_H // height to of mouth to crop from img
     FB.TUBE_MOUTH_H = 0.5 * FB.TUBE_MOUTH_SRC_H // height to scale all mouths to
     FB.GROUND_H = FB.imgs.ground.height * FB.SCALE_FACTOR
@@ -108,15 +109,20 @@
     FB.dFlapping = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FLAPPING_SPEED + itemSpeed)
     FB.dHover = (x, itemSpeed = 0) => helpers.dLinear(x, FB.HOVER_SPEED + itemSpeed)
     FB.gameOver = false
-    let ground, tubes, bird, ctx, score, bestScore, scoreStartTime
+    let ground, tubes, bird, ctx, score, bestScore, scoreStartTime,
+        keysInactive, isGameOver
+    keysInactive = false
     score = bestScore = 0
+    isGameOver = false
 
 
     $(document).on("keydown", (ev) => {
       let { which } = ev
       if (which === 32 || which === 38) {
         if (FB.gameOver) {
-          gameOn()
+          if (!keysInactive) {
+            gameOn()
+          }
         } else {
           if (false === tubes.isCreating)
             setTimeout(() => {
@@ -136,12 +142,10 @@
     gameOn()
 
     function render() {
-      let isGameOver = false
       // NOTE: hasCollisions() must come before hasFallen() b/c
       //  it updates checks done by hasFallen()
-      if (tubes.hasCollisions(bird) || bird.hasFallen()) {
+      if (!isGameOver && (tubes.hasCollisions(bird) || bird.hasFallen())) {
         gameOver();
-        isGameOver = true
       }
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
       ground.draw()
@@ -149,18 +153,15 @@
       bird.draw()
       if (isGameOver) {
         renderScore()
-        scoreStartTime = null
-
+        if (!keysInactive) renderBtns()
       }
+
       window.requestAnimationFrame(render)
     }
 
     function renderScore() {
       const ctx = canvas.getContext("2d"),
-            scoreImg = FB.imgs.score,
-            restartImg = FB.imgs.restart,
-            shareImg = FB.imgs.share,
-            atlImg = FB.imgs.addToLeaderboard
+            scoreImg = FB.imgs.score
 
       // update score
       // FIXME: 1. the score system is wrong 2. you should ask the tube if it
@@ -175,6 +176,23 @@
       ctx.drawImage(
         scoreImg, 0, 0, scoreImg.width, scoreImg.height,
         FB.SCORE_X1, FB.SCORE_Y1, FB.SCORE_W, FB.SCORE_H)
+
+      ctx.fillStyle = "black"
+      ctx.font = FB.SCORE_TXT_FONT;
+
+      // score text
+      ctx.fillText(score, FB.SCORE_TXT_X1, FB.SCORE_TXT_Y1);
+
+      // best score text
+      ctx.fillText(bestScore, FB.SCORE_TXT_X1, FB.BEST_SCORE_TXT_Y1);
+    }
+
+    function renderBtns() {
+      let ctx = canvas.getContext("2d"),
+          restartImg = FB.imgs.restart,
+          shareImg = FB.imgs.share,
+          atlImg = FB.imgs.addToLeaderboard
+
       // restart
       ctx.drawImage(
         restartImg, 0, 0, restartImg.width, restartImg.height,
@@ -189,12 +207,6 @@
         atlImg, 0, 0, atlImg.width, atlImg.height,
         FB.BTN_SM_X1, FB.BTN_SM_Y1 + FB.BTN_H + FB.SPACE_BETW_BTNS, FB.BTN_SM_W *2 + FB.SPACE_BETW_BTNS,FB.BTN_H
       )
-      ctx.fillStyle = "black"
-      ctx.font = FB.SCORE_TXT_FONT;
-      // score text
-      ctx.fillText(score, FB.SCORE_TXT_X1, FB.SCORE_TXT_Y1);
-      // best score text
-      ctx.fillText(bestScore, FB.SCORE_TXT_X1, FB.BEST_SCORE_TXT_Y1);
     }
 
     function gameOver() {
@@ -203,15 +215,22 @@
       tubes.stop()
       bird.stopFlapping()
       FB.gameOver = true
+      keysInactive = true
+      isGameOver = true
+      setTimeout(() => {
+          keysInactive = false
+      }, FB.ACTIVATE_KEYS_DELAY)
     }
 
     function gameOn() {
+      scoreStartTime = null
       score = 0
       ground = new FB.Ground(canvas, FB.imgs.ground)
       tubes = new FB.Tubes(canvas, FB.imgs.tube)
       bird = new FB.Bird(canvas, FB.imgs.bird)
       ctx = canvas.getContext("2d")
       FB.gameOver = false
+      isGameOver = false
       window.requestAnimationFrame(render)
     }
   }

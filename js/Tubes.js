@@ -6,6 +6,7 @@
     this.canvas = canvas
     this.img = img
     this.isCreating = false
+    this.stopped = false // should we stop tube creation
   }
 
   Tubes.prototype.startCreating = function () {
@@ -13,7 +14,7 @@
   };
 
   Tubes.prototype.shouldCreate = function () {
-    if (!this.isCreating) return false
+    if (!this.isCreating || this.stopped) return false
     let rightMostTube = this.tubes[this.tubes.length -1],
         shouldCreate = false
 
@@ -51,6 +52,7 @@
   };
 
   Tubes.prototype.stop = function () {
+    this.stopped = true
     this.tubes.forEach((tube) => tube.stop())
   };
 
