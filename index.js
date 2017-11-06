@@ -108,21 +108,17 @@
     }
     FB.dFlapping = (x, itemSpeed = 0) => helpers.dLinear(x, FB.FLAPPING_SPEED + itemSpeed)
     FB.dHover = (x, itemSpeed = 0) => helpers.dLinear(x, FB.HOVER_SPEED + itemSpeed)
-    FB.gameOver = false
     let ground, tubes, bird, ctx, score, bestScore, scoreStartTime,
         keysInactive, isGameOver
     keysInactive = false
-    score = bestScore = 0
+    bestScore = 0
     isGameOver = false
-
 
     $(document).on("keydown", (ev) => {
       let { which } = ev
       if (which === 32 || which === 38) {
-        if (FB.gameOver) {
-          if (!keysInactive) {
-            gameOn()
-          }
+        if (isGameOver && !keysInactive) {
+          gameOn()
         } else {
           if (false === tubes.isCreating)
             setTimeout(() => {
@@ -133,6 +129,7 @@
         }
       }
     })
+
     // draw background once
     background.getContext("2d")
       .drawImage(
@@ -151,7 +148,9 @@
       ground.draw()
       tubes.draw()
       bird.draw()
+
       if (isGameOver) {
+        updateScore()
         renderScore()
         if (!keysInactive) renderBtns()
       }
@@ -159,19 +158,24 @@
       window.requestAnimationFrame(render)
     }
 
+    function updateScore() {
+      if (score !== null) return score
+      let distFromCanvasX2ToBirdX1 = canvas.width - bird.x1,
+          tubePassInterval = distFromCanvasX2ToBirdX1 / FB.FOREGROUND_SPEED// interval at which a tube passes the bird in secs
+      if (scoreStartTime != null)
+        score = Math.ceil(((new Date() - scoreStartTime) / 1000) / tubePassInterval)
+      else score = 0
+      bestScore = Math.max(score, bestScore)
+    }
+
+    // TODO: turn into purse function where socreStartTime is passed in
     function renderScore() {
       const ctx = canvas.getContext("2d"),
             scoreImg = FB.imgs.score
 
-      // update score
       // FIXME: 1. the score system is wrong 2. you should ask the tube if it
       //  has passed a certain x point (bird.x1) for score++
-      if (scoreStartTime) {
-        let distFromCanvasX2ToBirdX1 = canvas.width - bird.x1,
-            tubePassInterval = distFromCanvasX2ToBirdX1 / FB.FOREGROUND_SPEED// interval at which a tube passes the bird in secs
-        score = Math.ceil(((new Date() - scoreStartTime) / 1000) / tubePassInterval)
-        bestScore = Math.max(score, bestScore)
-      }
+
       // score
       ctx.drawImage(
         scoreImg, 0, 0, scoreImg.width, scoreImg.height,
@@ -210,26 +214,20 @@
     }
 
     function gameOver() {
-
       ground.stop()
       tubes.stop()
       bird.stopFlapping()
-      FB.gameOver = true
       keysInactive = true
       isGameOver = true
-      setTimeout(() => {
-          keysInactive = false
-      }, FB.ACTIVATE_KEYS_DELAY)
+      setTimeout(() => keysInactive = false, FB.ACTIVATE_KEYS_DELAY)
     }
 
     function gameOn() {
-      scoreStartTime = null
-      score = 0
+      score = scoreStartTime = null
       ground = new FB.Ground(canvas, FB.imgs.ground)
       tubes = new FB.Tubes(canvas, FB.imgs.tube)
       bird = new FB.Bird(canvas, FB.imgs.bird)
       ctx = canvas.getContext("2d")
-      FB.gameOver = false
       isGameOver = false
       window.requestAnimationFrame(render)
     }
